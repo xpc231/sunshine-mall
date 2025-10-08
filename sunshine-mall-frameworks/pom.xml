@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    
+    <parent>
+        <groupId>com.xpcjsu</groupId>
+        <artifactId>sunshine-mall</artifactId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    
+    <artifactId>sunshine-mall-frameworks</artifactId>
+    <packaging>pom</packaging>
+    <name>sunshine-mall-frameworks</name>
+    <description>框架层模块 - 提供基础框架能力</description>
+
+    <modules>
+        <module>base</module>
+        <module>common</module>
+        <module>convention</module>
+        <module>database</module>
+        <module>cache</module>
+        <module>distributedid</module>
+        <module>idempotent</module>
+    </modules>
+
+    <dependencyManagement>
+        <dependencies>
+            <!-- 引入项目依赖管理 -->
+            <dependency>
+                <groupId>com.xpcjsu</groupId>
+                <artifactId>sunshine-mall-dependencies</artifactId>
+                <version>${project.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
+</project>

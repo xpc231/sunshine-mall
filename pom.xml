@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?><!--这是XML文档的声明部分，指定了文档遵循的XML版本为1.0，字符编码为UTF-8格式。-->
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+<!--    Maven项目的配置文件(POM.xml)的根元素部分：
+    project：Maven项目的根元素
+    xmlns：定义Maven POM命名空间
+    xmlns:xsi：定义XML Schema实例命名空间
+    xsi:schemaLocation：指定POM schema的位置，用于验证XML结构
+    modelVersion：声明POM模型版本为4.0.0
+    这些配置确保了Maven能够正确识别和处理项目配置。-->
+
+
+    <groupId>com.xpcjsu</groupId>
+    <artifactId>sunshine-mall</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>sunshine-mall</name>
+    <description>AI驱动分布式电商平台 - 父工程</description>
+<!--    Maven项目的父工程配置：
+    groupId: 项目组ID为com.xpcjsu
+    artifactId: 项目名称为sunshine-mall
+    version: 版本号0.0.1-SNAPSHOT（快照版本）
+    packaging: 打包方式为pom（父工程）
+    name: 项目显示名称
+    description: 项目描述为"AI驱动分布式电商平台 - 父工程"-->
+
+    <properties><!--属性配置-->
+        <java.version>17</java.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.version>3.9.4</maven.version>
+        <spring-boot.version>3.1.5</spring-boot.version>
+        <spring-cloud.version>2022.0.4</spring-cloud.version>
+        <spring-cloud-alibaba.version>2022.0.0.0</spring-cloud-alibaba.version>
+        <nacos.version>2.2.3</nacos.version>
+    </properties>
+
+    <!-- 子模块定义 -->
+    <modules>
+        <module>sunshine-mall-dependencies</module>
+        <module>sunshine-mall-frameworks</module>
+        <module>sunshine-mall-services</module>
+    </modules>
+
+    <!-- 依赖管理：仅定义版本，不实际引入 -->
+    <dependencyManagement>
+        <dependencies>
+            <!-- Spring Boot BOM -->
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-dependencies</artifactId>
+                <version>${spring-boot.version}</version>
+                <type>pom</type><!--指定依赖类型-->
+                <scope>import</scope><!--指定作用域为import,通过import作用域引入其他项目的pom文件，实现依赖配置-->
+            </dependency>
+            
+            <!-- Spring Cloud BOM -->
+            <dependency>
+                <groupId>org.springframework.cloud</groupId>
+                <artifactId>spring-cloud-dependencies</artifactId>
+                <version>${spring-cloud.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            
+            <!-- Spring Cloud Alibaba BOM -->
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-alibaba-dependencies</artifactId>
+                <version>${spring-cloud-alibaba.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+            
+            <!-- 项目内部模块版本管理通过各模块自己的dependencyManagement管理 -->
+        </dependencies>
+    </dependencyManagement>
+
+    <!--Maven构建配置-->
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId><!--用于SpringBoot应用的重新打包，使其可执行-->
+                    <version>${spring-boot.version}</version>
+                    <executions>
+                        <execution>
+                            <goals>
+                                <goal>repackage</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+                
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-compiler-plugin</artifactId><!--配置Java编译器版本和编码格式-->
+                    <version>3.11.0</version>
+                    <configuration>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                        <encoding>${project.build.sourceEncoding}</encoding>
+                    </configuration>
+                </plugin>
+                
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-surefire-plugin</artifactId><!--执行单元测试-->
+                    <version>3.1.2</version>
+                </plugin>
+                
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-failsafe-plugin</artifactId><!--执行集成测试-->
+                    <version>3.1.2</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+</project>
