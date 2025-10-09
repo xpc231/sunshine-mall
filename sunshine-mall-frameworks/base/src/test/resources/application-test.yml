@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: sunshine-mall-framework-base-test
+
+server:
+  port: 8080
+
+# 测试用配置
+test:
+  property:
+    string-value: "test-string"
+    int-value: 123
+    boolean-value: true
+
+logging:
+  level:
+    com.xpcjsu.sunshinemall: DEBUG
+    root: INFO
