@@ -1,5 +1,6 @@
 package com.xpcjsu.sunshinemall.framework.base.singleton.xpc;
 
+import java.lang.reflect.Constructor;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
@@ -45,7 +46,9 @@ public final class xpcSingletonHolder {
     public static <T> T getInstance(Class<T> clazz) {
         return getInstance(clazz, () -> {
             try {
-                return clazz.getDeclaredConstructor().newInstance();
+                Constructor<T>  constructor = clazz.getDeclaredConstructor();
+                constructor.setAccessible(true);
+                return constructor.newInstance();
             } catch (Exception e) {
                 throw new RuntimeException("Failed to create singleton instance using default constructor for class: " + clazz.getName(), e);
             }

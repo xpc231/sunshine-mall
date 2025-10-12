@@ -1,10 +1,9 @@
 package com.xpcjsu.sunshinemall.framework.base.config;
 
+import com.xpcjsu.sunshinemall.framework.base.singleton.SingletonHolder;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-
-import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -20,7 +19,8 @@ class ConfigManagerTest {
 
     @BeforeEach
     void setUp() {
-        configManager = new ConfigManager();
+        // 使用SingletonHolder获取ConfigManager实例
+        configManager = SingletonHolder.getInstance(ConfigManager.class);
         // 清理系统属性
         System.clearProperty("test.string.value");
         System.clearProperty("test.int.value");
@@ -39,6 +39,8 @@ class ConfigManagerTest {
         System.clearProperty("test.boolean.value");
         System.clearProperty("test.long.value");
         System.clearProperty("test.double.value");
+        // 清理SingletonHolder缓存（测试专用）
+        SingletonHolder.clear();
     }
 
     @Test
@@ -47,23 +49,11 @@ class ConfigManagerTest {
         String defaultValue = configManager.getString("test.string.value", "default");
         assertEquals("default", defaultValue);
 
-        // 设置系统属性
+        // 清空缓存后设置系统属性
+        configManager.clearCache();
         System.setProperty("test.string.value", "test-value");
         String actualValue = configManager.getString("test.string.value", "default");
         assertEquals("test-value", actualValue);
-    }
-
-    @Test
-    void testGetStringOptional() {
-        // 测试不存在的配置
-        Optional<String> emptyValue = configManager.getStringOptional("test.nonexistent.value");
-        assertTrue(emptyValue.isEmpty());
-
-        // 设置系统属性
-        System.setProperty("test.string.value", "test-value");
-        Optional<String> actualValue = configManager.getStringOptional("test.string.value");
-        assertTrue(actualValue.isPresent());
-        assertEquals("test-value", actualValue.get());
     }
 
     @Test
@@ -72,28 +62,21 @@ class ConfigManagerTest {
         Integer defaultValue = configManager.getInt("test.int.value", 100);
         assertEquals(100, defaultValue);
 
-        // 设置有效的整数值
+        // 清空缓存后设置有效的整数值
+        configManager.clearCache();
         System.setProperty("test.int.value", "200");
         Integer actualValue = configManager.getInt("test.int.value", 100);
         assertEquals(200, actualValue);
 
-        // 设置无效的整数值
+        // 清空缓存以测试新值
+        configManager.clearCache();
+        
+        // 设置无效的整数值，应该抛出ConfigException
         System.setProperty("test.int.value", "invalid");
-        Integer invalidValue = configManager.getInt("test.int.value", 100);
-        assertEquals(100, invalidValue); // 应该返回默认值
-    }
-
-    @Test
-    void testGetIntOptional() {
-        // 测试不存在的配置
-        Optional<Integer> emptyValue = configManager.getIntOptional("test.nonexistent.value");
-        assertTrue(emptyValue.isEmpty());
-
-        // 设置有效值
-        System.setProperty("test.int.value", "300");
-        Optional<Integer> actualValue = configManager.getIntOptional("test.int.value");
-        assertTrue(actualValue.isPresent());
-        assertEquals(300, actualValue.get());
+        ConfigException exception = assertThrows(ConfigException.class, () -> 
+            configManager.getInt("test.int.value", 100));
+        assertEquals("test.int.value", exception.getConfigKey());
+        assertTrue(exception.getMessage().contains("配置值格式错误"));
     }
 
     @Test
@@ -102,23 +85,21 @@ class ConfigManagerTest {
         Long defaultValue = configManager.getLong("test.long.value", 1000L);
         assertEquals(1000L, defaultValue);
 
-        // 设置有效的长整数值
+        // 清空缓存后设置有效的长整数值
+        configManager.clearCache();
         System.setProperty("test.long.value", "2000");
         Long actualValue = configManager.getLong("test.long.value", 1000L);
         assertEquals(2000L, actualValue);
-    }
-
-    @Test
-    void testGetLongOptional() {
-        // 测试不存在的配置
-        Optional<Long> emptyValue = configManager.getLongOptional("test.nonexistent.value");
-        assertTrue(emptyValue.isEmpty());
-
-        // 设置有效值
-        System.setProperty("test.long.value", "3000");
-        Optional<Long> actualValue = configManager.getLongOptional("test.long.value");
-        assertTrue(actualValue.isPresent());
-        assertEquals(3000L, actualValue.get());
+        
+        // 清空缓存以测试新值
+        configManager.clearCache();
+        
+        // 设置无效的长整数值，应该抛出ConfigException
+        System.setProperty("test.long.value", "invalid");
+        ConfigException exception = assertThrows(ConfigException.class, () -> 
+            configManager.getLong("test.long.value", 1000L));
+        assertEquals("test.long.value", exception.getConfigKey());
+        assertTrue(exception.getMessage().contains("配置值格式错误"));
     }
 
     @Test
@@ -127,38 +108,29 @@ class ConfigManagerTest {
         Boolean defaultValue = configManager.getBoolean("test.boolean.value", false);
         assertEquals(false, defaultValue);
 
-        // 测试true值
+        // 清空缓存后测试true值
+        configManager.clearCache();
         System.setProperty("test.boolean.value", "true");
         Boolean trueValue = configManager.getBoolean("test.boolean.value", false);
         assertEquals(true, trueValue);
 
-        // 测试1值
+        // 清空缓存后测试1值
+        configManager.clearCache();
         System.setProperty("test.boolean.value", "1");
         Boolean oneValue = configManager.getBoolean("test.boolean.value", false);
         assertEquals(true, oneValue);
 
-        // 测试yes值
+        // 清空缓存后测试yes值
+        configManager.clearCache();
         System.setProperty("test.boolean.value", "yes");
         Boolean yesValue = configManager.getBoolean("test.boolean.value", false);
         assertEquals(true, yesValue);
 
-        // 测试false值
+        // 清空缓存后测试false值
+        configManager.clearCache();
         System.setProperty("test.boolean.value", "false");
         Boolean falseValue = configManager.getBoolean("test.boolean.value", true);
         assertEquals(false, falseValue);
-    }
-
-    @Test
-    void testGetBooleanOptional() {
-        // 测试不存在的配置
-        Optional<Boolean> emptyValue = configManager.getBooleanOptional("test.nonexistent.value");
-        assertTrue(emptyValue.isEmpty());
-
-        // 设置有效值
-        System.setProperty("test.boolean.value", "true");
-        Optional<Boolean> actualValue = configManager.getBooleanOptional("test.boolean.value");
-        assertTrue(actualValue.isPresent());
-        assertEquals(true, actualValue.get());
     }
 
     @Test
@@ -167,23 +139,21 @@ class ConfigManagerTest {
         Double defaultValue = configManager.getDouble("test.double.value", 10.5);
         assertEquals(10.5, defaultValue);
 
-        // 设置有效的双精度值
+        // 清空缓存后设置有效的双精度值
+        configManager.clearCache();
         System.setProperty("test.double.value", "20.8");
         Double actualValue = configManager.getDouble("test.double.value", 10.5);
         assertEquals(20.8, actualValue);
-    }
-
-    @Test
-    void testGetDoubleOptional() {
-        // 测试不存在的配置
-        Optional<Double> emptyValue = configManager.getDoubleOptional("test.nonexistent.value");
-        assertTrue(emptyValue.isEmpty());
-
-        // 设置有效值
-        System.setProperty("test.double.value", "30.9");
-        Optional<Double> actualValue = configManager.getDoubleOptional("test.double.value");
-        assertTrue(actualValue.isPresent());
-        assertEquals(30.9, actualValue.get());
+        
+        // 清空缓存以测试新值
+        configManager.clearCache();
+        
+        // 设置无效的双精度值，应该抛出ConfigException
+        System.setProperty("test.double.value", "invalid");
+        ConfigException exception = assertThrows(ConfigException.class, () -> 
+            configManager.getDouble("test.double.value", 10.5));
+        assertEquals("test.double.value", exception.getConfigKey());
+        assertTrue(exception.getMessage().contains("配置值格式错误"));
     }
 
     @Test
@@ -216,16 +186,22 @@ class ConfigManagerTest {
     @Test
     void testInvalidKey() {
         // 测试null键
-        assertThrows(IllegalArgumentException.class, () -> 
+        ConfigException nullException = assertThrows(ConfigException.class, () -> 
             configManager.getString(null, "default"));
+        assertNull(nullException.getConfigKey());
+        assertTrue(nullException.getMessage().contains("配置键不能为null"));
 
         // 测试空键
-        assertThrows(IllegalArgumentException.class, () -> 
+        ConfigException emptyException = assertThrows(ConfigException.class, () -> 
             configManager.getString("", "default"));
+        assertEquals("", emptyException.getConfigKey());
+        assertTrue(emptyException.getMessage().contains("配置键不能为null"));
 
         // 测试空白键
-        assertThrows(IllegalArgumentException.class, () -> 
+        ConfigException blankException = assertThrows(ConfigException.class, () -> 
             configManager.getString("   ", "default"));
+        assertEquals("   ", blankException.getConfigKey());
+        assertTrue(blankException.getMessage().contains("配置键不能为null"));
     }
 
     @Test

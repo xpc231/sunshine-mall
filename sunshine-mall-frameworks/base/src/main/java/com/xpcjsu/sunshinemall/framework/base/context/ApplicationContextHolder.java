@@ -108,8 +108,10 @@ public final class ApplicationContextHolder implements ApplicationContextAware {
      * @return Optional包装的Bean实例
      */
     public static <T> Optional<T> getBeanOptional(Class<T> clazz) {
-        assertApplicationContextNotNull();
-        
+        if (!isApplicationContextInitialized()) {
+            return Optional.empty();
+        }
+
         try {
             return Optional.of(applicationContext.getBean(clazz));
         } catch (BeansException e) {

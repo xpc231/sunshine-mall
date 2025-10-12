@@ -1,5 +1,6 @@
 package com.xpcjsu.sunshinemall.framework.base.singleton;
 
+import java.lang.reflect.Constructor;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
@@ -87,7 +88,10 @@ public final class SingletonHolder {
         return getInstance(clazz, () -> {
             try {
                 //获取类的默认无参构造器
-                return clazz.getDeclaredConstructor().newInstance();
+                Constructor<T> constructor = clazz.getDeclaredConstructor();
+                // 设置可访问，允许访问私有构造器
+                constructor.setAccessible(true);
+                return constructor.newInstance();
             } catch (Exception e) {
                 throw new RuntimeException("Failed to create singleton instance using default constructor for class: " + clazz.getName(), e);
             }
