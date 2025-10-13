@@ -1,5 +1,7 @@
 package com.xpcjsu.sunshinemall.framework.base.config;
 
+import com.xpcjsu.sunshinemall.framework.base.exception.SystemException;
+
 /**
  * 配置异常
  * <p>
@@ -13,7 +15,7 @@ package com.xpcjsu.sunshinemall.framework.base.config;
  * @author sunshine-mall
  * @since 1.0.0
  */
-public class ConfigException extends RuntimeException {
+public class ConfigException extends SystemException {
 
     /**
      * 配置键
@@ -26,8 +28,7 @@ public class ConfigException extends RuntimeException {
      * @param message 异常信息
      */
     public ConfigException(String message) {
-        //Java 中子类构造器必须调用父类构造器
-        super(message);
+        super("CONFIG_ERROR", message);
         this.configKey = null;
     }
 
@@ -38,8 +39,11 @@ public class ConfigException extends RuntimeException {
      * @param configKey 配置键
      */
     public ConfigException(String message, String configKey) {
-        super(message);
+        super("CONFIG_ERROR", message);
         this.configKey = configKey;
+        if (configKey != null) {
+            addContext("configKey", configKey);
+        }
     }
 
     /**
@@ -49,7 +53,7 @@ public class ConfigException extends RuntimeException {
      * @param cause   原因异常
      */
     public ConfigException(String message, Throwable cause) {
-        super(message, cause);
+        super("CONFIG_ERROR", message, cause);
         this.configKey = null;
     }
 
@@ -61,8 +65,11 @@ public class ConfigException extends RuntimeException {
      * @param cause     原因异常
      */
     public ConfigException(String message, String configKey, Throwable cause) {
-        super(message, cause);
+        super("CONFIG_ERROR", message, cause);
         this.configKey = configKey;
+        if (configKey != null) {
+            addContext("configKey", configKey);
+        }
     }
 
     /**

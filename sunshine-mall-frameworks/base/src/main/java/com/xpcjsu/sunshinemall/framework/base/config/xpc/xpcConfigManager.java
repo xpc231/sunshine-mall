@@ -1,12 +1,10 @@
 package com.xpcjsu.sunshinemall.framework.base.config.xpc;
 
-import com.xpcjsu.sunshinemall.framework.base.config.ConfigException;
 import com.xpcjsu.sunshinemall.framework.base.context.ApplicationContextHolder;
 import org.springframework.core.env.Environment;
 import org.springframework.util.StringUtils;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 //该类内容与ConfigManager一样，只是用来重敲练习
