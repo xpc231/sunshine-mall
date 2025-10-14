@@ -57,6 +57,8 @@
         <!-- 测试相关 -->
         <testcontainers.version>1.19.1</testcontainers.version>
         <mockito.version>5.6.0</mockito.version>
+
+        <lombok.version>1.18.20</lombok.version>
     </properties>
 
     <dependencyManagement>
@@ -214,6 +216,14 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>${lombok.version}</version>
+                <scope>import</scope>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

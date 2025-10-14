@@ -55,7 +55,15 @@
                 <type>pom</type><!--指定依赖类型-->
                 <scope>import</scope><!--指定作用域为import,通过import作用域引入其他项目的pom文件，实现依赖配置-->
             </dependency>
-            
+
+            <dependency>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-test</artifactId>
+                <version>${spring-boot.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+
             <!-- Spring Cloud BOM -->
             <dependency>
                 <groupId>org.springframework.cloud</groupId>
@@ -112,11 +120,11 @@
                     <version>3.1.2</version>
                 </plugin>
                 
-                <plugin>
+<!--                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-failsafe-plugin</artifactId><!--执行集成测试-->
+                    <artifactId>maven-failsafe-plugin</artifactId>&lt;!&ndash;执行集成测试&ndash;&gt;
                     <version>3.1.2</version>
-                </plugin>
+                </plugin>-->
             </plugins>
         </pluginManagement>
     </build>

@@ -22,6 +22,8 @@
             <version>${project.version}</version>
         </dependency>
         
+        <!-- 暂时注释未实现的框架模块 -->
+        <!--
         <dependency>
             <groupId>com.xpcjsu</groupId>
             <artifactId>sunshine-mall-framework-database</artifactId>
@@ -45,6 +47,7 @@
             <artifactId>sunshine-mall-framework-idempotent</artifactId>
             <version>${project.version}</version>
         </dependency>
+        -->
         
         <!-- JWT认证 -->
         <dependency>
