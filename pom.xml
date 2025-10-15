@@ -26,15 +26,18 @@
     description: 项目描述为"AI驱动分布式电商平台 - 父工程"-->
 
     <properties><!--属性配置-->
+
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.version>3.9.4</maven.version>
+
         <spring-boot.version>3.1.5</spring-boot.version>
         <spring-cloud.version>2022.0.4</spring-cloud.version>
         <spring-cloud-alibaba.version>2022.0.0.0</spring-cloud-alibaba.version>
         <nacos.version>2.2.3</nacos.version>
+
     </properties>
 
     <!-- 子模块定义 -->
@@ -55,14 +58,6 @@
                 <type>pom</type><!--指定依赖类型-->
                 <scope>import</scope><!--指定作用域为import,通过import作用域引入其他项目的pom文件，实现依赖配置-->
             </dependency>
-
-            <dependency>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-starter-test</artifactId>
-                <version>${spring-boot.version}</version>
-                <scope>test</scope>
-            </dependency>
-
 
             <!-- Spring Cloud BOM -->
             <dependency>
@@ -119,12 +114,7 @@
                     <artifactId>maven-surefire-plugin</artifactId><!--执行单元测试-->
                     <version>3.1.2</version>
                 </plugin>
-                
-<!--                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-failsafe-plugin</artifactId>&lt;!&ndash;执行集成测试&ndash;&gt;
-                    <version>3.1.2</version>
-                </plugin>-->
+
             </plugins>
         </pluginManagement>
     </build>

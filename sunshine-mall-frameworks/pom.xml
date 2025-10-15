@@ -38,30 +38,23 @@
         </dependencies>
     </dependencyManagement>
 
-    <!-- 所有框架子模块的公共依赖 -->
+    <!-- 所有框架子模块共同依赖 -->
     <dependencies>
-        <dependency>
-            <groupId>org.projectlombok</groupId>
-            <artifactId>lombok</artifactId>
-            <scope>provided</scope>
-        </dependency>
-
-
+        <!-- Spring Boot Starter Test - 所有框架模块都需要用于单元测试 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- Lombok - 所有模块都需要 -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <!-- 确保使用JUnit 5 Platform -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-            </plugin>
-        </plugins>
-    </build>
+
 
 </project>

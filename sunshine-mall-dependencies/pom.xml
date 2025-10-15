@@ -23,7 +23,6 @@
         <mysql.version>8.0.33</mysql.version>
         <druid.version>1.2.20</druid.version>
         <mybatis-plus.version>3.5.4.1</mybatis-plus.version>
-        <shardingsphere.version>5.3.2</shardingsphere.version>
         
         <!-- 缓存相关 -->
         <redisson.version>3.24.3</redisson.version>
@@ -37,26 +36,15 @@
         
         <!-- AI相关 -->
         <spring-ai.version>1.0.3</spring-ai.version>
-        <milvus.version>2.3.4</milvus.version>
-        <huggingface.version>0.0.4</huggingface.version>
         
         <!-- 工具类 -->
         <hutool.version>5.8.22</hutool.version>
         <fastjson2.version>2.0.43</fastjson2.version>
-        <mapstruct.version>1.5.5.Final</mapstruct.version>
         <jwt.version>4.4.0</jwt.version>
-        
-        <!-- 监控相关 -->
-        <skywalking.version>9.0.0</skywalking.version>
-        <micrometer.version>1.11.5</micrometer.version>
-        
-        <!-- 文档相关 -->
-        <knife4j.version>4.3.0</knife4j.version>
-        <swagger.version>2.2.15</swagger.version>
-        
+
         <!-- 测试相关 -->
-        <testcontainers.version>1.19.1</testcontainers.version>
-        <mockito.version>5.6.0</mockito.version>
+        <junit5.version>5.8.2</junit5.version>
+        <junit4.version>4.13.2</junit4.version>
 
         <lombok.version>1.18.20</lombok.version>
     </properties>
@@ -72,7 +60,7 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            
+
             <!-- ========================= 数据库相关 ========================= -->
             <!-- MySQL驱动 -->
             <dependency>
@@ -94,13 +82,7 @@
                 <artifactId>mybatis-plus-boot-starter</artifactId>
                 <version>${mybatis-plus.version}</version>
             </dependency>
-            
-            <!-- ShardingSphere 分库分表 -->
-            <dependency>
-                <groupId>org.apache.shardingsphere</groupId>
-                <artifactId>shardingsphere-jdbc-core</artifactId>
-                <version>${shardingsphere.version}</version>
-            </dependency>
+
 
             <!-- ========================= 缓存相关 ========================= -->
             <!-- Redisson -->
@@ -142,13 +124,7 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            
-            <!-- Milvus 向量数据库 -->
-            <dependency>
-                <groupId>io.milvus</groupId>
-                <artifactId>milvus-sdk-java</artifactId>
-                <version>${milvus.version}</version>
-            </dependency>
+
 
             <!-- ========================= 工具类 ========================= -->
             <!-- Hutool 工具包 -->
@@ -164,18 +140,7 @@
                 <artifactId>fastjson2</artifactId>
                 <version>${fastjson2.version}</version>
             </dependency>
-            
-            <!--&lt;!&ndash; MapStruct 对象映射 &ndash;&gt;
-            <dependency>
-                <groupId>org.mapstruct</groupId>
-                <artifactId>mapstruct</artifactId>
-                <version>${mapstruct.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.mapstruct</groupId>
-                <artifactId>mapstruct-processor</artifactId>
-                <version>${mapstruct.version}</version>
-            </dependency>-->
+
             
             <!-- JWT -->
             <dependency>
@@ -184,44 +149,37 @@
                 <version>${jwt.version}</version>
             </dependency>
 
-            <!-- ========================= 文档相关 ========================= -->
-            <!-- Knife4j API文档 -->
-            <dependency>
-                <groupId>com.github.xiaoymin</groupId>
-                <artifactId>knife4j-openapi3-jakarta-spring-boot-starter</artifactId>
-                <version>${knife4j.version}</version>
-            </dependency>
-
-            <!-- ========================= 监控相关 ========================= -->
-           <!-- &lt;!&ndash; SkyWalking &ndash;&gt;
-            <dependency>
-                <groupId>org.apache.skywalking</groupId>
-                <artifactId>apm-toolkit-trace</artifactId>
-                <version>${skywalking.version}</version>
-            </dependency>
-            
-            &lt;!&ndash; Micrometer 指标收集 &ndash;&gt;
-            <dependency>
-                <groupId>io.micrometer</groupId>
-                <artifactId>micrometer-registry-prometheus</artifactId>
-                <version>${micrometer.version}</version>
-            </dependency>-->
-
             <!-- ========================= 测试相关 ========================= -->
-            <!-- Testcontainers -->
+            <!--Spring test-->
             <dependency>
-                <groupId>org.testcontainers</groupId>
-                <artifactId>testcontainers-bom</artifactId>
-                <version>${testcontainers.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-test</artifactId>
+                <version>${spring-boot.version}</version>
+                <scope>test</scope>
             </dependency>
 
+            <!-- JUnit 5 -->
+            <dependency>
+                <groupId>org.junit.jupiter</groupId>
+                <artifactId>junit-jupiter</artifactId>
+                <version>${junit5.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!-- JUnit 4 兼容性 -->
+            <dependency>
+                <groupId>junit</groupId>
+                <artifactId>junit</artifactId>
+                <version>${junit4.version}</version>
+                <scope>test</scope>
+            </dependency>
+
+            <!-- Lombok -->
             <dependency>
                 <groupId>org.projectlombok</groupId>
                 <artifactId>lombok</artifactId>
                 <version>${lombok.version}</version>
-                <scope>import</scope>
+                <scope>provided</scope>
             </dependency>
 
         </dependencies>
