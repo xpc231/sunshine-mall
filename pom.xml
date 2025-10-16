@@ -50,6 +50,7 @@
     <!-- 依赖管理：仅定义版本，不实际引入 -->
     <dependencyManagement>
         <dependencies>
+
             <!-- Spring Boot BOM -->
             <dependency>
                 <groupId>org.springframework.boot</groupId>

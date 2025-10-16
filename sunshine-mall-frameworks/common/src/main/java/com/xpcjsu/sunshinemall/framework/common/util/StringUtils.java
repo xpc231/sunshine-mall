@@ -62,7 +62,15 @@ public final class StringUtils {
         return str == null || str.length() == 0;
     }
 
-
+    /**
+     * 检查字符串是否为空白（null、空字符串或只包含空白字符）
+     * 
+     * @param str 待检查的字符串
+     * @return 如果字符串为null、空字符串或只包含空白字符返回true，否则返回false
+     */
+    public static boolean isBlank(String str) {
+        return str == null || str.trim().length() == 0;
+    }
 
     /**
      * 检查字符串是否不为空且不为空白
@@ -71,7 +79,7 @@ public final class StringUtils {
      * @return 如果字符串不为null且包含非空白字符返回true，否则返回false
      */
     public static boolean hasText(String str) {
-        return str != null && str.trim().length() > 0;
+        return !isBlank(str);
     }
 
     /**

@@ -29,6 +29,16 @@ class StringUtilsTest {
     }
 
     @Test
+    void testIsBlank() {
+        assertTrue(StringUtils.isBlank(null));
+        assertTrue(StringUtils.isBlank(""));
+        assertTrue(StringUtils.isBlank(" "));
+        assertTrue(StringUtils.isBlank("  \t\n  "));
+        assertFalse(StringUtils.isBlank("hello"));
+        assertFalse(StringUtils.isBlank(" hello "));
+    }
+
+    @Test
     void testHasText() {
         assertFalse(StringUtils.hasText(null));
         assertFalse(StringUtils.hasText(""));

@@ -39,7 +39,7 @@
         
         <!-- 工具类 -->
         <hutool.version>5.8.22</hutool.version>
-        <fastjson2.version>2.0.43</fastjson2.version>
+        <fastjson2-extension-spring6.version>2.0.40</fastjson2-extension-spring6.version>
         <jwt.version>4.4.0</jwt.version>
 
         <!-- 测试相关 -->
@@ -137,8 +137,8 @@
             <!-- FastJson2 -->
             <dependency>
                 <groupId>com.alibaba.fastjson2</groupId>
-                <artifactId>fastjson2</artifactId>
-                <version>${fastjson2.version}</version>
+                <artifactId>fastjson2-extension-spring6</artifactId>
+                <version>${fastjson2-extension-spring6.version}</version>
             </dependency>
 
             
