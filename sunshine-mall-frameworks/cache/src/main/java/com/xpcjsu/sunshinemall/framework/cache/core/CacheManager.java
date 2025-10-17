@@ -203,6 +203,50 @@ public class CacheManager {
     }
 
     /**
+     * 设置缓存（仅当key不存在时）
+     * <p>
+     * 基于Redis的SETNX命令，用于实现分布式锁和幂等性控制。
+     * 原子操作，线程安全。
+     *
+     * @param key        缓存键
+     * @param value      缓存值
+     * @param expireTime 过期时间（秒）
+     * @return true:设置成功, false:key已存在
+     */
+    public Boolean setIfAbsent(String key, Object value, long expireTime) {
+        try {
+            Boolean result = redisTemplate.opsForValue().setIfAbsent(
+                key, 
+                value, 
+                expireTime, 
+                TimeUnit.SECONDS
+            );
+            log.debug("设置缓存(NX) - key: {}, success: {}, expireTime: {}s", 
+                key, result, expireTime);
+            return result != null ? result : false;
+        } catch (Exception e) {
+            log.error("设置缓存(NX)失败 - key: {}", key, e);
+            throw new RuntimeException("设置缓存(NX)失败", e);
+        }
+    }
+
+    /**
+     * 检查缓存键是否存在
+     *
+     * @param key 缓存键
+     * @return true:存在, false:不存在
+     */
+    public Boolean hasKey(String key) {
+        try {
+            Boolean result = redisTemplate.hasKey(key);
+            return result != null ? result : false;
+        } catch (Exception e) {
+            log.error("检查缓存键失败 - key: {}", key, e);
+            return false;
+        }
+    }
+
+    /**
      * 自增操作
      *
      * @param key   缓存键

@@ -15,12 +15,14 @@
     <description>分布式ID模块 - 雪花算法分布式ID</description>
 
     <dependencies>
+        <!-- Base模块 - 提供SingletonHolder和ConfigManager -->
         <dependency>
             <groupId>com.xpcjsu</groupId>
-            <artifactId>sunshine-mall-framework-common</artifactId>
+            <artifactId>sunshine-mall-framework-base</artifactId>
             <version>${project.version}</version>
         </dependency>
         
+        <!-- Spring Boot Starter -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>

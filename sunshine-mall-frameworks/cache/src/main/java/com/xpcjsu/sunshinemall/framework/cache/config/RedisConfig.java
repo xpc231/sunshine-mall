@@ -19,12 +19,15 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
  * @author sunshine-mall
  * @since 1.0.0
  */
+
 // 配置前（默认）：key为乱码，value包含类信息
 //\xac\xed\x00\x05t\x00\x04use
 // 配置后（自定义）：key和value都为可读格式
 //user:1001 -> {"id":1001,"name":"张三"}
 
+//组件扫描机制自动加载
 //当Spring Boot应用启动时，会自动扫描并加载该配置类,@Bean 注解的方法会自动注册到Spring容器中
+
 @Configuration
 public class RedisConfig {
 

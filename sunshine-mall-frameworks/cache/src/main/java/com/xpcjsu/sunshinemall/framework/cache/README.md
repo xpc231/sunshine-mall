@@ -15,6 +15,7 @@ Cache模块为sunshine-mall电商平台提供统一的缓存管理能力，封�
 - 批量操作：批量获取、批量删除
 - 计数器：increment、decrement
 - 缓存穿透防护：空值缓存
+- 幂等性控制：setIfAbsent（SETNX）
 
 **使用示例：**
 
@@ -39,6 +40,10 @@ cacheManager.decrement("counter:stock", 5);          // 自减
 
 // 防缓存穿透
 cacheManager.setNullValue("product:999");            // 设置空值缓存（5分钟）
+
+// 幂等性控制
+Boolean success = cacheManager.setIfAbsent("idempotent:order:123", "1", 60);  // SETNX
+Boolean exists = cacheManager.hasKey("user:1");     // 检查key是否存在
 ```
 
 ### 2. CacheKeyBuilder - 缓存键构建工具
@@ -204,7 +209,38 @@ public class ViewCountService {
 }
 ```
 
-### 4. 库存扣减场景
+### 4. 幂等性控制场景
+
+```java
+@Service
+public class IdempotentService {
+    
+    @Autowired
+    private CacheManager cacheManager;
+    
+    public void createOrder(String orderId) {
+        String idempotentKey = "idempotent:order:" + orderId;
+        
+        // 尝试设置幂等键（仅当key不存在时）
+        Boolean success = cacheManager.setIfAbsent(idempotentKey, "1", 60);
+        
+        if (!success) {
+            throw new RuntimeException("请勿重复提交");
+        }
+        
+        try {
+            // 执行业务逻辑
+            orderService.create(orderId);
+        } catch (Exception e) {
+            // 业务失败，删除幂等键，允许重试
+            cacheManager.delete(idempotentKey);
+            throw e;
+        }
+    }
+}
+```
+
+### 5. 库存扣减场景
 
 ```java
 @Service

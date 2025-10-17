@@ -62,7 +62,7 @@ public final class ConfigManager {
 
     /**
      * 获取整数配置
-     *.vauleOf()可能抛出异常
+     *.valueOf()可能抛出异常
      *
      * @param key          配置键
      * @param defaultValue 默认值

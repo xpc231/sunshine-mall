@@ -197,6 +197,45 @@ class CacheManagerTest {
 
     @Test
     @Order(8)
+    @DisplayName("测试setIfAbsent操作（幂等性控制）")
+    void testSetIfAbsent() {
+        String idempotentKey = "test:idempotent:order-123";
+        
+        // 第一次设置，应该成功
+        Boolean result1 = cacheManager.setIfAbsent(idempotentKey, "1", 60L);
+        assertTrue(result1);
+        
+        // 第二次设置同key，应该失败
+        Boolean result2 = cacheManager.setIfAbsent(idempotentKey, "2", 60L);
+        assertFalse(result2);
+        
+        // 验证值没有被覆盖
+        Object value = cacheManager.get(idempotentKey);
+        assertEquals("1", value);
+        
+        // 清理
+        cacheManager.delete(idempotentKey);
+    }
+    
+    @Test
+    @Order(9)
+    @DisplayName("测试hasKey操作")
+    void testHasKey() {
+        // key不存在
+        assertFalse(cacheManager.hasKey(TEST_KEY));
+        
+        // 设置缓存
+        cacheManager.set(TEST_KEY, TEST_USER);
+        
+        // key存在
+        assertTrue(cacheManager.hasKey(TEST_KEY));
+        
+        // 清理
+        cacheManager.delete(TEST_KEY);
+    }
+
+    @Test
+    @Order(10)
     @DisplayName("测试decrement操作")
     void testDecrement() {
         String counterKey = "test:counter:2";
