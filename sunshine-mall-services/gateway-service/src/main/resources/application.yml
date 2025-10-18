@@ -1,0 +1,125 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: gateway-service
+
+  cloud:
+    # Nacos 服务发现配置
+    nacos:
+      discovery:
+        server-addr: localhost:8848
+        namespace: dev
+        enabled: true
+
+    # Gateway 路由配置
+    gateway:
+      # 静态路由配置
+      routes:
+        # 用户服务路由
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/user/**
+          filters:
+            - StripPrefix=1
+
+        # 商品服务路由
+        - id: product-service
+          uri: lb://product-service
+          predicates:
+            - Path=/api/product/**
+          filters:
+            - StripPrefix=1
+
+        # 订单服务路由
+        - id: order-service
+          uri: lb://order-service
+          predicates:
+            - Path=/api/order/**
+          filters:
+            - StripPrefix=1
+
+        # 支付服务路由
+        - id: pay-service
+          uri: lb://pay-service
+          predicates:
+            - Path=/api/pay/**
+          filters:
+            - StripPrefix=1
+
+        # 物流服务路由
+        - id: logistics-service
+          uri: lb://logistics-service
+          predicates:
+            - Path=/api/logistics/**
+          filters:
+            - StripPrefix=1
+
+        # AI 服务路由
+        - id: ai-service
+          uri: lb://ai-service
+          predicates:
+            - Path=/api/ai/**
+          filters:
+            - StripPrefix=1
+
+      # 全局过滤器配置
+      default-filters:
+        - name: Retry
+          args:
+            retries: 3
+            statuses: BAD_GATEWAY,GATEWAY_TIMEOUT
+            methods: GET,POST
+            backoff:
+              firstBackoff: 10ms
+              maxBackoff: 50ms
+              factor: 2
+              basedOnPreviousValue: false
+
+      # 负载均衡配置
+      loadbalancer:
+        use404: true
+
+  # Redis 配置（用于Token黑名单等场景）
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
+      timeout: 5000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+
+# JWT 配置
+jwt:
+  # 密钥（生产环境必须配置，长度≥32字节）
+  # 示例：使用强随机密钥生成器生成
+  # openssl rand -base64 32
+  secret: ${JWT_SECRET:your-production-secret-key-min-32-bytes-required!!}
+  # Token过期时间（2小时）
+  expiration: 7200000
+
+# 日志配置
+logging:
+  level:
+    root: INFO
+    com.xpcjsu.sunshinemall: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# 监控端点配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      show-details: always
