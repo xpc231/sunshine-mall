@@ -118,8 +118,8 @@ class GatewayServiceApplicationTests {
     @DisplayName("测试Token中的用户信息传递")
     void testUserInfoInToken() {
         // 验证Token解析功能
-        String userId = jwtUtil.getUserIdFromToken(validToken);
-        String username = jwtUtil.getUsernameFromToken(validToken);
+        String userId = jwtUtil.getUserIdFromToken(jwtUtil.parseToken(validToken));
+        String username = jwtUtil.getUsernameFromToken(jwtUtil.parseToken(validToken));
 
         assert userId.equals("10001");
         assert username.equals("testuser");

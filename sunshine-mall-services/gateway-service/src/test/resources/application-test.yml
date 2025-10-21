@@ -26,7 +26,7 @@ spring:
       database: 1
 
 jwt:
-  # 测试环境密钥（32字节以上）
+  # 测试环境密钥（32以上）
   secret: test-secret-key-for-jwt-min-32-bytes-required-here!!
   expiration: 7200000
 

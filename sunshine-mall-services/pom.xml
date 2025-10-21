@@ -60,6 +60,13 @@
             <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
         </dependency>
         
+        <!-- Lombok - 所有微服务都需要 -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        
         <!-- 测试依赖 - 所有微服务都需要 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>

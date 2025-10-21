@@ -156,12 +156,12 @@ public class JwtUtil {
     /**
      * 从 Token 中获取用户ID
      *
-     * @param token JWT Token
+     * @param  JWT Token
      * @return 用户ID
      * @throws RuntimeException 如果Token中缺少userId信息或为空
      */
-    public String getUserIdFromToken(String token) {
-        DecodedJWT decodedJWT = parseToken(token);
+    public String getUserIdFromToken(DecodedJWT decodedJWT) {
+        log.info("解析Token获取用户ID: {}", decodedJWT);
 
         // 安全获取claims Map：防止多层级空指针
         Map<String, Object> claimsMap = decodedJWT.getClaim("claims").asMap();
@@ -180,12 +180,12 @@ public class JwtUtil {
     /**
      * 从 Token 中获取用户名
      *
-     * @param token JWT Token
+     * @param  decodedJWT
      * @return 用户名
      * @throws RuntimeException 如果Token中缺少username信息或为空
      */
-    public String getUsernameFromToken(String token) {
-        DecodedJWT decodedJWT = parseToken(token);
+    public String getUsernameFromToken(DecodedJWT decodedJWT) {
+        log.info("解析Token获取用户名: {}", decodedJWT);
 
         // 安全获取claims Map：防止多层级空指针
         Map<String, Object> claimsMap = decodedJWT.getClaim("claims").asMap();
