@@ -43,12 +43,38 @@ public final class SnowflakeIdGenerator {
      */
     private SnowflakeIdGenerator() {
         // 从配置中读取DatacenterId和WorkerId
+        // 注意：ConfigManager可能无法从 Spring Environment 读取配置（容器未完全初始化）
+        // 因此需要提供默认值保证创建成功
         ConfigManager configManager = SingletonHolder.getInstance(ConfigManager.class);
         
         this.datacenterId = configManager.getLong("distributed-id.datacenter-id", 0L);
         this.workerId = configManager.getLong("distributed-id.worker-id", 0L);
 
         // 参数校验
+        validateParameters(datacenterId, workerId);
+    }
+
+    /**
+     * 公共构造器，用于Spring Bean创建
+     * 
+     * @param datacenterId 数据中心ID（0-31）
+     * @param workerId     工作机器ID（0-31）
+     */
+    public SnowflakeIdGenerator(long datacenterId, long workerId) {
+        this.datacenterId = datacenterId;
+        this.workerId = workerId;
+        
+        // 参数校验
+        validateParameters(datacenterId, workerId);
+    }
+
+    /**
+     * 验证参数有效性
+     * 
+     * @param datacenterId 数据中心ID
+     * @param workerId     工作机器ID
+     */
+    private void validateParameters(long datacenterId, long workerId) {
         if (datacenterId > MAX_DATACENTER_ID || datacenterId < 0) {
             throw new IllegalArgumentException(
                 String.format("DatacenterId 必须在 0-%d 之间，当前值: %d", MAX_DATACENTER_ID, datacenterId)
