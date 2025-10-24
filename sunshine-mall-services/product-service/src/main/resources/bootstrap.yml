@@ -1,0 +1,11 @@
+## Bootstrap 配置 - Nacos 配置中心优先加载
+#spring:
+#  application:
+#    name: product-service
+#  cloud:
+#    nacos:
+#      config:
+#        server-addr: 127.0.0.1:8848
+#        namespace: dev
+#        group: SUNSHINE_MALL_GROUP
+#        file-extension: yaml
