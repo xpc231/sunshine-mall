@@ -76,6 +76,13 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- 缓存穿透防护框架 -->
+        <dependency>
+            <groupId>com.xpcjsu</groupId>
+            <artifactId>cache-penetration-protection</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- 数据库相关 -->
         <dependency>
             <groupId>com.mysql</groupId>
@@ -103,6 +110,12 @@
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
+        </dependency>
+
+        <!-- Guava 布隆过滤器 -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
         </dependency>
 
         <!-- Spring Boot Configuration Processor -->

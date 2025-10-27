@@ -15,9 +15,11 @@ import com.xpcjsu.sunshinemall.product.constant.ProductConstants;
 import com.xpcjsu.sunshinemall.product.dto.ProductDTO;
 import com.xpcjsu.sunshinemall.product.entity.Category;
 import com.xpcjsu.sunshinemall.product.entity.Product;
+import com.xpcjsu.sunshinemall.product.filter.ProductBloomFilter;
 import com.xpcjsu.sunshinemall.product.mapper.CategoryMapper;
 import com.xpcjsu.sunshinemall.product.mapper.ProductMapper;
 import com.xpcjsu.sunshinemall.product.service.ProductService;
+import com.xpcjsu.sunshinemall.product.util.ProductParamValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -41,6 +43,7 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryMapper categoryMapper;
     private final CacheManager cacheManager;
     private final SnowflakeIdGenerator idGenerator;
+    private final ProductBloomFilter productBloomFilter;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -79,6 +82,9 @@ public class ProductServiceImpl implements ProductService {
 
         // 保存到数据库
         productMapper.insert(product);
+
+        // 添加到布隆过滤器
+        productBloomFilter.addProduct(productId);
 
         log.info("创建商品成功 - productId: {}, productCode: {}", productId, productCode);
         return productId;
@@ -145,20 +151,33 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDTO getProductById(Long productId) {
-        if (productId == null) {
-            throw new ValidationException("PRODUCT_ID_REQUIRED", "商品ID不能为空");
+        // 第一道防线: 参数校验
+        ProductParamValidator.validateProductId(productId);
+
+        // 第二道防线: 布隆过滤器拦截
+        if (!productBloomFilter.productMightExist(productId)) {
+            log.warn("布隆过滤器拦截 - 商品ID不存在: {}", productId);
+            throw new BusinessException("PRODUCT_NOT_FOUND", "商品不存在");
         }
 
-        // 先从缓存获取
+        // 第三道防线: 缓存查询(包含空值缓存)
         String cacheKey = getProductCacheKey(productId);
         String cacheValue = cacheManager.get(cacheKey, String.class);
         if (StringUtils.hasText(cacheValue)) {
+            // 检查是否为空值缓存
+            if ("NULL".equals(cacheValue)) {
+                log.debug("命中空值缓存 - productId: {}", productId);
+                throw new BusinessException("PRODUCT_NOT_FOUND", "商品不存在");
+            }
             return JSONUtil.toBean(cacheValue, ProductDTO.class);
         }
 
-        // 从数据库查询
+        // 第四道防线: 数据库查询
         Product product = productMapper.selectById(productId);
         if (product == null) {
+            // 设置空值缓存(60秒过期)
+            cacheManager.set(cacheKey, "NULL", 60L);
+            log.info("设置空值缓存 - productId: {}", productId);
             throw new BusinessException("PRODUCT_NOT_FOUND", "商品不存在");
         }
 
