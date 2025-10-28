@@ -1,0 +1,81 @@
+server:
+  port: 8084
+  servlet:
+    context-path: /order
+
+spring:
+  application:
+    name: order-service
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.100.128:3307/sunshine_mall_order?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123
+
+  data:
+    redis:
+      host: 192.168.100.128
+      port: 6379
+      password: 123321
+      database: 0
+      timeout: 3000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+
+    # Nacos 配置中心
+  cloud:
+    nacos:
+      config:
+        import-check:
+          enabled: false
+      server-addr: 192.168.100.128:8848
+
+
+mybatis-plus:
+  mapper-locations: classpath:/mapper/**/*.xml
+  type-aliases-package: com.xpcjsu.sunshinemall.order.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: ASSIGN_ID
+      logic-delete-field: delFlag
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# RocketMQ 配置
+rocketmq:
+  name-server: 192.168.100.128:9876
+  producer:
+    group: order-service-producer-group
+    send-message-timeout: 3000
+    retry-times-when-send-failed: 2
+
+feign:
+  okhttp:
+    enabled: true # 开启OKHttp功能
+
+# 日志配置
+logging:
+  level:
+    # 业务代码日志级别
+    com.xpcjsu.sunshinemall: INFO
+    # Mapper SQL 日志级别 - DEBUG 才能看到 SQL
+    com.xpcjsu.sunshinemall.product.mapper: DEBUG
+    # MyBatis 日志
+    org.mybatis: DEBUG
+    # Spring 框架日志
+    org.springframework: INFO
+    # Nacos 日志
+    com.alibaba.nacos: INFO
+
+# JWT配置（与网关保持一致）
+jwt:
+  secret: sunshine-mall-secret-key-2024
+  expiration: 7200000
