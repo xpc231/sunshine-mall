@@ -41,7 +41,7 @@ mybatis-plus:
   type-aliases-package: com.xpcjsu.sunshinemall.order.entity
   configuration:
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
   global-config:
     db-config:
       id-type: ASSIGN_ID
@@ -67,7 +67,7 @@ logging:
     # 业务代码日志级别
     com.xpcjsu.sunshinemall: INFO
     # Mapper SQL 日志级别 - DEBUG 才能看到 SQL
-    com.xpcjsu.sunshinemall.product.mapper: DEBUG
+    com.xpcjsu.sunshinemall.order.mapper: DEBUG
     # MyBatis 日志
     org.mybatis: DEBUG
     # Spring 框架日志
@@ -75,7 +75,4 @@ logging:
     # Nacos 日志
     com.alibaba.nacos: INFO
 
-# JWT配置（与网关保持一致）
-jwt:
-  secret: sunshine-mall-secret-key-2024
-  expiration: 7200000
+# 认证交由网关统一处理，此处不再配置JWT。
