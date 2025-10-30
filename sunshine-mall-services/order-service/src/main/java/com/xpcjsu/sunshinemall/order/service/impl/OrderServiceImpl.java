@@ -4,10 +4,12 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xpcjsu.sunshinemall.framework.base.exception.BusinessException;
 import com.xpcjsu.sunshinemall.framework.base.exception.ValidationException;
+import com.xpcjsu.sunshinemall.framework.cache.core.CacheManager;
 import com.xpcjsu.sunshinemall.framework.convention.errorcode.BusinessErrorCode;
 import com.xpcjsu.sunshinemall.framework.idempotent.annotation.Idempotent;
 import com.xpcjsu.sunshinemall.order.client.ProductSkuClient;
 import com.xpcjsu.sunshinemall.order.client.StockClient;
+import com.xpcjsu.sunshinemall.order.constant.CacheConstants;
 import com.xpcjsu.sunshinemall.order.constant.OrderConstants;
 import com.xpcjsu.sunshinemall.order.dto.external.ProductSkuDTO;
 import com.xpcjsu.sunshinemall.order.dto.order.OrderCreateRequest;
@@ -47,8 +49,8 @@ public class OrderServiceImpl implements OrderService {
     private final StockClient stockClient;
     private final OrderIdGenerator orderIdGenerator;
     private final RocketMQTemplate rocketMQTemplate;
-    // 统一使用构造函数依赖注入，复用Spring容器中的ObjectMapper配置
     private final ObjectMapper objectMapper;
+    private final CacheManager cacheManager;
 
     @Override
     @Idempotent(key = "'order:create:' + #userId + ':' + #request.clientToken", prefix = "idempotent", expireTime = 120)
@@ -96,6 +98,67 @@ public class OrderServiceImpl implements OrderService {
                 .build();
     }
 
+
+    //查询订单详情
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public OrderDetailResponse getOrderDetail(Long userId, String orderNo) {
+        // 查询订单基本信息
+        OrderInfo order = getOrderByOrderNo(userId, orderNo);
+
+        if (order == null) {
+            throw new BusinessException(BusinessErrorCode.SYSTEM_PARAM_ERROR, "订单不存在");
+        }
+
+        // 查询订单项
+        List<OrderItem> orderItems = listOrderItems(order.getId());
+
+        // 构建响应对象
+        OrderDetailResponse orderDetailResponse = OrderDetailResponse.builder()
+                .orderId(order.getId())
+                .orderNo(order.getOrderNo())
+                .userId(order.getUserId())
+                .status(order.getStatus())
+                .statusName(OrderStatus.fromCode(order.getStatus()).getDesc())
+                .totalAmount(order.getTotalAmount())
+                .paymentAmount(order.getPayAmount())
+                .paymentTime(order.getPaymentTime())
+                .createTime(order.getCreateTime())
+                .updateTime(order.getUpdateTime())
+                .items(orderItems)
+                .build();
+
+        cacheManager.set(CacheConstants.CACHE_KEY_ORDER_DETAIL + order.getId(), orderDetailResponse);
+
+        return orderDetailResponse;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public boolean paySuccess(Long userId, String orderNo, String paySn) {
+        // 1) 查询并校验订单
+        OrderInfo order = loadOrderOrThrow(userId, orderNo);
+        ensurePayable(order);
+
+        // 2) 确认扣减库存
+        List<OrderItem> items = listOrderItems(order.getId());
+        confirmDeductForPayment(order, items, "PAY");
+
+        // 3) 更新订单状态与支付时间
+        order.setStatus(OrderStatus.WAIT_SHIP.getCode());
+        order.setPaymentTime(LocalDateTime.now());
+        order.setUpdateTime(LocalDateTime.now());
+
+        orderInfoMapper.updateById(order);
+
+        // 4) 发送支付成功事件
+        //sendOrderEvent(OrderConstants.MQ.Tags.PAID, order.getId(), orderNo, userId);
+
+        return true;
+    }
+
+
+    //取消订单不携带原因
     @Override
     public boolean cancelOrder(Long userId, String orderNo) {
         // 兼容无原因取消的接口，复用带原因的实现，避免重复逻辑
@@ -118,78 +181,37 @@ public class OrderServiceImpl implements OrderService {
         order.setStatus(OrderStatus.CANCELLED.getCode());
         order.setNote(StringUtils.defaultIfBlank(reason, order.getNote()));
         order.setUpdateTime(LocalDateTime.now());
+
         orderInfoMapper.updateById(order);
 
         // 4) 发送取消事件
-        sendOrderEvent(OrderConstants.MQ.Tags.CANCELLED, order.getId(), orderNo, userId);
+        //sendOrderEvent(OrderConstants.MQ.Tags.CANCELLED, order.getId(), orderNo, userId);
 
         return true;
     }
 
+    //根据订单号查询订单
     @Override
     public OrderInfo getOrderByOrderNo(Long userId, String orderNo) {
         return loadOrderOrThrow(userId, orderNo);
     }
 
+    //查询订单项
     @Override
     public List<OrderItem> listOrderItems(Long orderId) {
+
         if (orderId == null) {
             throw new ValidationException(BusinessErrorCode.SYSTEM_PARAM_ERROR, "orderId不能为空");
         }
+
         return orderItemMapper.selectList(new QueryWrapper<OrderItem>()
                 .eq("order_id", orderId)
                 .eq("is_deleted", 0));
     }
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public boolean paySuccess(Long userId, String orderNo, String paySn) {
-        // 1) 查询并校验订单
-        OrderInfo order = loadOrderOrThrow(userId, orderNo);
-        ensurePayable(order);
 
-        // 2) 确认扣减库存
-        List<OrderItem> items = listOrderItems(order.getId());
-        confirmDeductForPayment(order, items, "PAY");
 
-        // 3) 更新订单状态与支付时间
-        order.setStatus(OrderStatus.WAIT_SHIP.getCode());
-        order.setPaymentTime(LocalDateTime.now());
-        order.setUpdateTime(LocalDateTime.now());
-        orderInfoMapper.updateById(order);
 
-        // 4) 发送支付成功事件
-        sendOrderEvent(OrderConstants.MQ.Tags.PAID, order.getId(), orderNo, userId);
-        return true;
-    }
-
-    @Override
-    public OrderDetailResponse getOrderDetail(Long userId, String orderNo) {
-        // 查询订单基本信息
-        OrderInfo order = getOrderByOrderNo(userId, orderNo);
-        if (order == null) {
-            throw new BusinessException(BusinessErrorCode.SYSTEM_PARAM_ERROR, "订单不存在");
-        }
-
-        // 查询订单项
-        List<OrderItem> orderItems = listOrderItems(order.getId());
-
-        // 构建响应对象
-        return OrderDetailResponse.builder()
-                .orderId(order.getId())
-                .orderNo(order.getOrderNo())
-                .userId(order.getUserId())
-                .status(order.getStatus())
-                .statusName(OrderStatus.fromCode(order.getStatus()).getDesc())
-                .totalAmount(order.getTotalAmount())
-                // 修复字段命名不一致：OrderInfo为payAmount，响应为paymentAmount
-                .paymentAmount(order.getPayAmount())
-                .paymentTime(order.getPaymentTime())
-                .createTime(order.getCreateTime())
-                .updateTime(order.getUpdateTime())
-                .items(orderItems)
-                .build();
-    }
 
     // ===================== 私有方法：公共逻辑封装，减少重复与圈复杂度 =====================
 
@@ -434,54 +456,77 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
+    //查询订单
     private OrderInfo loadOrderOrThrow(Long userId, String orderNo) {
+
         if (userId == null) {
             throw new BusinessException(BusinessErrorCode.USER_NOT_LOGIN, "用户未登录");
         }
+
         if (StringUtils.isBlank(orderNo)) {
             throw new ValidationException(BusinessErrorCode.SYSTEM_PARAM_ERROR, "订单号不能为空");
         }
+
         OrderInfo order = orderInfoMapper.selectOne(new QueryWrapper<OrderInfo>()
                 .eq("order_no", orderNo)
                 .eq("user_id", userId)
                 .eq("is_deleted", 0));
+
         if (order == null) {
             throw new BusinessException(BusinessErrorCode.ORDER_NOT_FOUND, "订单不存在");
         }
+
         return order;
     }
 
+    //确认订单可取消
     private void ensureCancellable(OrderInfo order) {
+
         if (Objects.equals(order.getStatus(), OrderStatus.CANCELLED.getCode())) {
             throw new BusinessException(BusinessErrorCode.ORDER_CANCELLED, "订单已取消");
         }
+
         if (!Objects.equals(order.getStatus(), OrderStatus.WAIT_PAY.getCode())) {
             throw new BusinessException(BusinessErrorCode.ORDER_STATUS_ERROR, "仅待支付订单可取消");
         }
     }
 
+    //确认订单可支付
     private void ensurePayable(OrderInfo order) {
+
         if (!Objects.equals(order.getStatus(), OrderStatus.WAIT_PAY.getCode())) {
             throw new BusinessException(BusinessErrorCode.ORDER_STATUS_ERROR, "非待付款订单不可支付确认");
         }
     }
 
+    //取消订单释放库存
     private void unlockOrderStockForCancel(OrderInfo order, List<OrderItem> items, String tagPrefix) {
         for (OrderItem item : items) {
+
             try {
-                stockClient.unlockStock(item.getSkuId(), item.getQuantity(), order.getId(), tagPrefix + ":" + order.getOrderNo());
+                stockClient.unlockStock(item.getSkuId(), item.getQuantity(), order.getId(),
+                        tagPrefix + ":" + order.getOrderNo());
+
             } catch (Exception e) {
-                log.warn("取消订单释放库存失败，skuId={}, qty={}, orderId={}", item.getSkuId(), item.getQuantity(), order.getId());
+                log.warn("取消订单释放库存失败，skuId={}, qty={}, orderId={}",
+                        item.getSkuId(), item.getQuantity(), order.getId());
             }
+
         }
     }
 
+    //确认扣减库存
     private void confirmDeductForPayment(OrderInfo order, List<OrderItem> items, String tagPrefix) {
+
         for (OrderItem item : items) {
-            var res = stockClient.confirmDeduct(item.getSkuId(), item.getQuantity(), order.getId(), tagPrefix + ":" + order.getOrderNo());
+
+            var res = stockClient.confirmDeduct(item.getSkuId(), item.getQuantity(),
+                    order.getId(), tagPrefix + ":" + order.getOrderNo());
+
             if (res == null || res.isFailure()) {
                 throw new BusinessException(BusinessErrorCode.SYSTEM_BUSY, "库存确认扣减失败，请稍后重试");
             }
+
         }
     }
 }

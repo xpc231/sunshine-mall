@@ -36,17 +36,12 @@ public class OrderController {
         return Result.success(response, "创建成功");
     }
 
-    @Operation(summary = "取消订单")
-    @PostMapping("/cancel")
-    public Result<Void> cancelOrder(@RequestBody @Valid OrderCancelRequest request, HttpServletRequest httpRequest) {
-        Long userId = getUserIdFromRequest(httpRequest);
-        orderService.cancelOrder(userId, request.getOrderNo());
-        return Result.success();
-    }
 
     @Operation(summary = "订单详情")
     @GetMapping("/{orderNo}")
-    public Result<OrderDetailResponse> getOrderDetail(@PathVariable String orderNo, HttpServletRequest httpRequest) {
+    public Result<OrderDetailResponse> getOrderDetail(@PathVariable String orderNo,
+                                                      HttpServletRequest httpRequest) {
+
         Long userId = getUserIdFromRequest(httpRequest);
         OrderDetailResponse response = orderService.getOrderDetail(userId, orderNo);
         return Result.success(response);
@@ -54,11 +49,27 @@ public class OrderController {
 
     @Operation(summary = "支付成功回调（确认扣减库存，更新状态）")
     @PostMapping("/pay/success")
-    public Result<Void> paySuccess(@RequestBody @Valid OrderPaySuccessRequest request, HttpServletRequest httpRequest) {
+    public Result<Void> paySuccess(@RequestBody @Valid OrderPaySuccessRequest request,
+                                   HttpServletRequest httpRequest) {
+
         Long userId = getUserIdFromRequest(httpRequest);
         orderService.paySuccess(userId, request.getOrderNo(), request.getPaySn());
         return Result.success();
     }
+
+    @Operation(summary = "取消订单")
+    @PostMapping("/cancel")
+    public Result<Void> cancelOrder(@RequestBody @Valid OrderCancelRequest request,
+                                    HttpServletRequest httpRequest) {
+
+        Long userId = getUserIdFromRequest(httpRequest);
+        orderService.cancelOrder(userId, request.getOrderNo());
+        return Result.success();
+    }
+
+    //TODO: 分页查询用户所有订单
+
+    //TODO: 售后服务
 
     /**
      * 从请求中提取用户ID，优先使用网关透传的Header: X-User-Id；
