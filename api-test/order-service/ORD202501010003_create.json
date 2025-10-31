@@ -1,0 +1,16 @@
+{
+  "items": [
+    { "skuId": 40005, "quantity": 1 }
+  ],
+  "payType": 1,
+  "sourceType": 2,
+  "orderType": 0,
+  "receiverName": "李四",
+  "receiverPhone": "13900000002",
+  "receiverProvince": "江苏省",
+  "receiverCity": "苏州市",
+  "receiverDistrict": "工业园区",
+  "receiverAddress": "独墅湖大道2号",
+  "note": "用户主动取消",
+  "clientToken": "ORD202501010003-uuid-001"
+}

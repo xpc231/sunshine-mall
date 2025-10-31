@@ -1,0 +1,17 @@
+{
+  "items": [
+    { "skuId": 40003, "quantity": 1 },
+    { "skuId": 40004, "quantity": 1 }
+  ],
+  "payType": 2,
+  "sourceType": 1,
+  "orderType": 0,
+  "receiverName": "张三",
+  "receiverPhone": "13800000001",
+  "receiverProvince": "浙江省",
+  "receiverCity": "杭州市",
+  "receiverDistrict": "西湖区",
+  "receiverAddress": "龙井路1号",
+  "note": "正常支付完成-待发货",
+  "clientToken": "ORD202501010002-6b54-d6f1-001"
+}

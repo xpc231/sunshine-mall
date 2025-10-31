@@ -1,0 +1,16 @@
+{
+  "items": [
+    { "skuId": 40010, "quantity": 1 }
+  ],
+  "payType": 2,
+  "sourceType": 3,
+  "orderType": 1,
+  "receiverName": "王五",
+  "receiverPhone": "13700000003",
+  "receiverProvince": "上海市",
+  "receiverCity": "上海市",
+  "receiverDistrict": "浦东新区",
+  "receiverAddress": "世纪大道3号",
+  "note": "秒杀订单示例",
+  "clientToken": "ORD202501010007-uuid-001"
+}

@@ -1,0 +1,83 @@
+server:
+  port: 8085
+  servlet:
+    context-path: /pay
+
+spring:
+  application:
+    name: pay-service
+
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://192.168.100.128:3307/sunshine_mall_pay?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+    username: root
+    password: 123
+
+  data:
+    redis:
+      host: 192.168.100.128
+      port: 6379
+      password: 123321
+      database: 0
+      timeout: 3000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+
+    # Nacos 配置中心
+  cloud:
+    nacos:
+      config:
+        import-check:
+          enabled: false
+      server-addr: 192.168.100.128:8848
+
+# 分布式ID配置，保持与product-service一致风格
+distributed-id:
+  datacenter-id: 1
+  worker-id: 1
+
+
+mybatis-plus:
+  mapper-locations: classpath:/mapper/**/*.xml
+  type-aliases-package: com.xpcjsu.sunshinemall.pay.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+  global-config:
+    db-config:
+      id-type: ASSIGN_ID
+      logic-delete-field: delFlag
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# RocketMQ 配置
+rocketmq:
+  name-server: 192.168.100.128:9876
+  producer:
+    group: pay-service-producer-group
+    send-message-timeout: 3000
+    retry-times-when-send-failed: 2
+
+feign:
+  okhttp:
+    enabled: true # 开启OKHttp功能
+
+# 日志配置
+logging:
+  level:
+    # 业务代码日志级别
+    com.xpcjsu.sunshinemall: INFO
+    # Mapper SQL 日志级别 - DEBUG 才能看到 SQL
+    com.xpcjsu.sunshinemall.pay.mapper: DEBUG
+    # MyBatis 日志
+    org.mybatis: DEBUG
+    # Spring 框架日志
+    org.springframework: INFO
+    # Nacos 日志
+    com.alibaba.nacos: INFO
+
+# 认证交由网关统一处理，此处不再配置JWT。

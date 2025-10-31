@@ -1,0 +1,16 @@
+{
+  "items": [
+    { "skuId": 40009, "quantity": 1 }
+  ],
+  "payType": 1,
+  "sourceType": 1,
+  "orderType": 0,
+  "receiverName": "张三",
+  "receiverPhone": "13800000001",
+  "receiverProvince": "浙江省",
+  "receiverCity": "杭州市",
+  "receiverDistrict": "西湖区",
+  "receiverAddress": "龙井路1号",
+  "note": "支付失败示例",
+  "clientToken": "ORD202501010006-uuid-001"
+}
