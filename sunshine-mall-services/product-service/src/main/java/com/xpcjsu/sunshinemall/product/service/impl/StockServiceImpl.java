@@ -134,8 +134,8 @@ public class StockServiceImpl implements StockService {
     public boolean deductStock(Long skuId, Integer quantity, Long orderId, String remark) {
         validateParams(skuId, quantity);
 
-        // Redis预扣减（可选，高并发场景开启）
-        boolean redisPreDeduct = tryRedisPreDeduct(skuId, quantity);
+        // 移除与非查询相关的缓存处理逻辑（不进行Redis预扣减）
+        boolean redisPreDeduct = false;
 
         // 乐观锁重试执行扣减
         return retryWithOptimisticLock(skuId, quantity, orderId, remark, redisPreDeduct,
@@ -355,9 +355,8 @@ public class StockServiceImpl implements StockService {
     private void afterStockChange(Long skuId, Integer operationType, Integer quantity,
                                  Integer beforeStock, Integer afterStock,
                                  Long orderId, String remark) {
-        clearStockCache(skuId);
         recordStockLog(skuId, operationType, quantity, beforeStock, afterStock, orderId, remark);
-        sendStockChangeMessage(skuId, operationType, quantity, beforeStock, afterStock, orderId, remark);
+        //sendStockChangeMessage(skuId, operationType, quantity, beforeStock, afterStock, orderId, remark);
     }
 
     /**

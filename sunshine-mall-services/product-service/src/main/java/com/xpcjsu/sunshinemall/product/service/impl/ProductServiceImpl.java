@@ -15,7 +15,6 @@ import com.xpcjsu.sunshinemall.product.constant.ProductConstants;
 import com.xpcjsu.sunshinemall.product.dto.ProductDTO;
 import com.xpcjsu.sunshinemall.product.entity.Category;
 import com.xpcjsu.sunshinemall.product.entity.Product;
-import com.xpcjsu.sunshinemall.product.filter.ProductBloomFilter;
 import com.xpcjsu.sunshinemall.product.mapper.CategoryMapper;
 import com.xpcjsu.sunshinemall.product.mapper.ProductMapper;
 import com.xpcjsu.sunshinemall.product.service.ProductService;
@@ -43,7 +42,6 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryMapper categoryMapper;
     private final CacheManager cacheManager;
     private final SnowflakeIdGenerator idGenerator;
-    private final ProductBloomFilter productBloomFilter;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -83,8 +81,7 @@ public class ProductServiceImpl implements ProductService {
         // 保存到数据库
         productMapper.insert(product);
 
-        // 添加到布隆过滤器
-        productBloomFilter.addProduct(productId);
+        //TODO 添加到布隆过滤器
 
         log.info("创建商品成功 - productId: {}, productCode: {}", productId, productCode);
         return productId;
@@ -120,8 +117,6 @@ public class ProductServiceImpl implements ProductService {
         int updated = productMapper.updateById(product);
 
         if (updated > 0) {
-            // 清除商品详情缓存
-            clearProductCache(productDTO.getId());
             log.info("更新商品成功 - productId: {}", productDTO.getId());
         }
 
@@ -141,8 +136,6 @@ public class ProductServiceImpl implements ProductService {
         int deleted = productMapper.deleteById(productId);
 
         if (deleted > 0) {
-            // 清除商品详情缓存
-            clearProductCache(productId);
             log.info("删除商品成功 - productId: {}", productId);
         }
 
@@ -154,11 +147,11 @@ public class ProductServiceImpl implements ProductService {
         // 第一道防线: 参数校验
         ProductParamValidator.validateProductId(productId);
 
-        // 第二道防线: 布隆过滤器拦截
+/*        // 第二道防线: 布隆过滤器拦截
         if (!productBloomFilter.productMightExist(productId)) {
             log.warn("布隆过滤器拦截 - 商品ID不存在: {}", productId);
             throw new BusinessException("PRODUCT_NOT_FOUND", "商品不存在");
-        }
+        }*/
 
         // 第三道防线: 缓存查询(包含空值缓存)
         String cacheKey = getProductCacheKey(productId);
@@ -257,8 +250,6 @@ public class ProductServiceImpl implements ProductService {
                 .eq(Product::getId, productId));
 
         if (updated > 0) {
-            // 清除商品详情缓存
-            clearProductCache(productId);
             log.info("商品上架成功 - productId: {}", productId);
         }
 
@@ -289,8 +280,6 @@ public class ProductServiceImpl implements ProductService {
                 .eq(Product::getId, productId));
 
         if (updated > 0) {
-            // 清除商品详情缓存
-            clearProductCache(productId);
             log.info("商品下架成功 - productId: {}", productId);
         }
 

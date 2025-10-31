@@ -69,10 +69,7 @@ public class CategoryServiceImpl implements CategoryService {
 
         // 保存到数据库
         categoryMapper.insert(category);
-
-        // 清除分类树缓存
-        clearCategoryTreeCache();
-
+        
         log.info("创建分类成功 - categoryId: {}, name: {}", categoryId, category.getName());
         return categoryId;
     }
@@ -112,8 +109,6 @@ public class CategoryServiceImpl implements CategoryService {
         int updated = categoryMapper.updateById(category);
 
         if (updated > 0) {
-            // 清除分类树缓存
-            clearCategoryTreeCache();
             log.info("更新分类成功 - categoryId: {}", categoryDTO.getId());
         }
 
@@ -139,8 +134,6 @@ public class CategoryServiceImpl implements CategoryService {
         int deleted = categoryMapper.deleteById(categoryId);
 
         if (deleted > 0) {
-            // 清除分类树缓存
-            clearCategoryTreeCache();
             log.info("删除分类成功 - categoryId: {}", categoryId);
         }
 

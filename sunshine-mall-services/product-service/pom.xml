@@ -76,13 +76,6 @@
             <version>${project.version}</version>
         </dependency>
 
-        <!-- 缓存穿透防护框架 -->
-        <dependency>
-            <groupId>com.xpcjsu</groupId>
-            <artifactId>cache-penetration-protection</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
         <!-- 数据库相关 -->
         <dependency>
             <groupId>com.mysql</groupId>

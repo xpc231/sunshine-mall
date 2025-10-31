@@ -70,10 +70,7 @@ public class ProductSkuServiceImpl implements ProductSkuService {
 
         // 保存到数据库
         productSkuMapper.insert(sku);
-
-        // 清除SKU缓存
-        clearSkuCache(skuId);
-
+        
         log.info("创建SKU成功 - skuId: {}, skuCode: {}", skuId, skuCode);
         return skuId;
     }
@@ -112,8 +109,6 @@ public class ProductSkuServiceImpl implements ProductSkuService {
         int updated = productSkuMapper.updateById(sku);
 
         if (updated > 0) {
-            // 清除SKU缓存
-            clearSkuCache(skuDTO.getId());
             log.info("更新SKU成功 - skuId: {}", skuDTO.getId());
         }
 
@@ -134,8 +129,6 @@ public class ProductSkuServiceImpl implements ProductSkuService {
         int deleted = productSkuMapper.deleteById(skuId);
 
         if (deleted > 0) {
-            // 清除SKU缓存
-            clearSkuCache(skuId);
             log.info("删除SKU成功 - skuId: {}", skuId);
         }
 

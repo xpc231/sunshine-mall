@@ -3,6 +3,7 @@ package com.xpcjsu.sunshinemall.framework.distributedid.core;
 import com.xpcjsu.sunshinemall.framework.base.config.ConfigManager;
 import com.xpcjsu.sunshinemall.framework.base.singleton.SingletonHolder;
 import lombok.Getter;
+import org.springframework.stereotype.Component;
 
 import static com.xpcjsu.sunshinemall.framework.distributedid.core.SnowflakeConstants.*;
 
@@ -14,6 +15,7 @@ import static com.xpcjsu.sunshinemall.framework.distributedid.core.SnowflakeCons
  * @author sunshine-mall
  * @since 1.0.0
  */
+@Component
 @Getter
 public final class SnowflakeIdGenerator {
 
