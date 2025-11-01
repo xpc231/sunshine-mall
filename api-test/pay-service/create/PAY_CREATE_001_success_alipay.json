@@ -1,0 +1,35 @@
+{
+  "caseId": "PAY_CREATE_001",
+  "title": "创建支付-支付宝-正常",
+  "api": {
+    "method": "POST",
+    "path": "/pay/api/pay/create",
+    "headers": {"Content-Type": "application/json", "userId": 20001}
+  },
+
+  "request": {
+    "orderNo": "ORD202501010002",
+    "amount": 288.00,
+    "payType": 1,
+    "subject": "订单支付-支付宝",
+    "body": "测试-支付宝",
+    "clientToken": "PAY-ORD202501010002-uuid-001"
+  },
+
+  "expected": {
+    "httpStatus": 200,
+    "body": {
+      "code": "0",
+      "message": "操作成功",
+      "data": {
+        "payId": "notNull",
+        "payNo": "startsWith:P",
+        "payUrl": "contains:alipay.qr|mock.alipay.qr|mock.pay/qr"
+      }
+    }
+  },
+  "notes": [
+    "若未配置支付宝密钥，将返回模拟二维码链接",
+    "重复使用相同 clientToken 时应返回同一支付单（幂等）"
+  ]
+}

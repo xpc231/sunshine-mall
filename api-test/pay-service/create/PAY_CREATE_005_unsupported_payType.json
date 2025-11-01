@@ -1,0 +1,23 @@
+{
+  "caseId": "PAY_CREATE_005",
+  "title": "创建支付-不支持的支付方式(返回模拟链接)",
+  "api": {
+    "method": "POST",
+    "path": "/pay/api/pay/create",
+    "headers": {"Content-Type": "application/json", "userId": 20001}
+  },
+  "request": {
+    "orderNo": "ORD202501010006",
+    "amount": 10.00,
+    "payType": 9,
+    "clientToken": "PAY-ORD202501010006-uuid-001"
+  },
+  "expected": {
+    "httpStatus": 200,
+    "body": {
+      "code": "0",
+      "data": {"payUrl": "contains:mock.pay/qr"}
+    }
+  },
+  "notes": ["未知支付方式将返回mock链接，不抛错"]
+}

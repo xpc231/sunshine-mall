@@ -1,0 +1,12 @@
+{
+  "caseId": "PAY_REFUND_CREATE_004",
+  "title": "创建退款-缺少订单编号",
+  "api": {
+    "method": "POST",
+    "path": "/pay/api/pay/refund/create",
+    "headers": {"Content-Type": "application/json", "userId": 20001}
+  },
+  "request": {"amount": 10.00},
+  "expected": {"httpStatus": 400, "body": {"code": "SYSTEM_PARAM_ERROR"}},
+  "notes": ["@Valid 校验失败，返回400"]
+}

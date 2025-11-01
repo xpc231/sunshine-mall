@@ -1,0 +1,12 @@
+{
+  "caseId": "PAY_MOCK_CALLBACK_002",
+  "title": "模拟支付成功回调-重复调用幂等",
+  "api": {
+    "method": "POST",
+    "path": "/pay/api/pay/mock/callback",
+    "headers": {"Content-Type": "application/json", "userId": 20001}
+  },
+  "request": {"payNo": "P_REPLACE_ME"},
+  "expected": {"httpStatus": 200, "body": {"code": "0", "data": true}},
+  "notes": ["若支付状态已成功，服务层直接返回true，不重复处理"]
+}

@@ -1,0 +1,19 @@
+{
+  "caseId": "PAY_CREATE_004",
+  "title": "创建支付-缺少订单编号",
+  "api": {
+    "method": "POST",
+    "path": "/pay/api/pay/create",
+    "headers": {"Content-Type": "application/json", "userId": 20001}
+  },
+  "request": {
+    "amount": 100.00,
+    "payType": 1,
+    "clientToken": "PAY-ORD202501010005-uuid-001"
+  },
+  "expected": {
+    "httpStatus": 400,
+    "body": {"code": "SYSTEM_PARAM_ERROR"}
+  },
+  "notes": ["@Valid 触发参数校验异常，返回400"]
+}

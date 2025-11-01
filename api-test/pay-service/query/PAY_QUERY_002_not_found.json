@@ -1,0 +1,7 @@
+{
+  "caseId": "PAY_QUERY_002",
+  "title": "查询支付-记录不存在",
+  "api": {"method": "GET", "path": "/pay/api/pay/P9999999999"},
+  "expected": {"httpStatus": 200, "body": {"code": "PAYMENT_FAILED", "message": "支付记录不存在"}},
+  "notes": ["使用不存在的 payNo"]
+}

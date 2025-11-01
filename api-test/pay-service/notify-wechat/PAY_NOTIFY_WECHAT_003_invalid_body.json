@@ -1,0 +1,17 @@
+{
+  "caseId": "PAY_NOTIFY_WECHAT_003",
+  "title": "微信V3回调-Body非法",
+  "api": {
+    "method": "POST",
+    "path": "/pay/api/pay/notify/wechat",
+    "headers": {
+      "Content-Type": "application/json",
+      "Wechatpay-Serial": "SERIAL-MOCK",
+      "Wechatpay-Signature": "SIG-MOCK",
+      "Wechatpay-Timestamp": "1735689600",
+      "Wechatpay-Nonce": "NONCE-MOCK"
+    }
+  },
+  "request": {"bad": true},
+  "expected": {"httpStatus": 200, "text": "failure"}
+}

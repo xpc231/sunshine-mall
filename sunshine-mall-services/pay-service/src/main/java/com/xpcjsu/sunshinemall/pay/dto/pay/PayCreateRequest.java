@@ -20,6 +20,9 @@ public class PayCreateRequest {
     @NotBlank(message = "订单编号不能为空")
     private String orderNo;
 
+    @NotNull(message = "订单ID不能为空")
+    private Long orderId;
+
     @NotNull(message = "支付金额不能为空")
     private BigDecimal amount;
 

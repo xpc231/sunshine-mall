@@ -1,0 +1,20 @@
+{
+  "caseId": "PAY_CREATE_006",
+  "title": "创建支付-缺少用户请求头",
+  "api": {
+    "method": "POST",
+    "path": "/pay/api/pay/create",
+    "headers": {"Content-Type": "application/json"}
+  },
+  "request": {
+    "orderNo": "ORD202501010007",
+    "amount": 1.00,
+    "payType": 1,
+    "clientToken": "PAY-ORD202501010007-uuid-001"
+  },
+  "expected": {
+    "httpStatus": 500,
+    "body": {"code": "SYSTEM_ERROR"}
+  },
+  "notes": ["缺少请求头可能触发缺省异常处理，实际返回码视全局异常处理器而定"]
+}

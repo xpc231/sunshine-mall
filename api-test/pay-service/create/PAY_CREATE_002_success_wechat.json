@@ -1,0 +1,32 @@
+{
+  "caseId": "PAY_CREATE_002",
+  "title": "创建支付-微信-正常",
+  "api": {
+    "method": "POST",
+    "path": "/pay/api/pay/create",
+    "headers": {"Content-Type": "application/json", "userId": 20001}
+  },
+  "request": {
+    "orderNo": "ORD202501010003",
+    "amount": 99.90,
+    "payType": 2,
+    "subject": "订单支付-微信",
+    "body": "测试-微信",
+    "clientToken": "PAY-ORD202501010003-uuid-001"
+  },
+  "expected": {
+    "httpStatus": 200,
+    "body": {
+      "code": "0",
+      "message": "操作成功",
+      "data": {
+        "payId": "notNull",
+        "payNo": "startsWith:P",
+        "payUrl": "contains:wechat.qr|mock.wechat.qr|mock.pay/qr"
+      }
+    }
+  },
+  "notes": [
+    "若未配置微信密钥，将返回模拟二维码链接"
+  ]
+}

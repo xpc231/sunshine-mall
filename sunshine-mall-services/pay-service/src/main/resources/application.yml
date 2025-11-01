@@ -56,6 +56,7 @@ mybatis-plus:
 
 # RocketMQ 配置
 rocketmq:
+  enabled: false
   name-server: 192.168.100.128:9876
   producer:
     group: pay-service-producer-group
@@ -65,6 +66,27 @@ rocketmq:
 feign:
   okhttp:
     enabled: true # 开启OKHttp功能
+
+# 支付渠道配置（占位，后续由你在Nacos或本地配置具体密钥）
+alipay:
+  easy:
+    enabled: true
+    protocol: https
+    gatewayHost: openapi-sandbox.dl.alipaydev.com
+    sign-type: RSA2
+    app-id: "9021000157633942"
+    merchant-private-key: "MIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQDDWigB+mNDhGrpAzSHm+c8/bsSoJDgKr2/jqgI//jhVR3M5h4CcP8dS/ZCd69SNBY8qZy1Pu5JJWNOljCt/TC1r663n8Mt2OPkM/G0YaaT8EETnTgDMMs0Fa0a8c0CXQP8nYMwb7lOTKOXbSrLWN9cT4FHAbP3j5qrSv1XZJlE8itmwbN/qPFxwYLKmx9vcmJ+QjDsnXpseG9bwLZ82SXyfk5ny0TVjq3ea0Lc+xm+BK+36oC+cWqqTxw9294FkhWa4bPtK3yIBaAjhHF2RaJYlZUrBeODGyY6NAQuaTa1KPs0LqbMEhAX1rr8NuyiO/62VlXU4dKOiVBYl5p+U3C9AgMBAAECggEAPglHYzlshGhsuwp1iAsOZ+P7oHK1DzsDfu2ClzkShBxPll4NcaEIovkYfwsa9fPsi98hEL2nVjs1SiOP2fDpowjjZxSpGsohtLp6K1pHV/uX7u6idwDrxuKLUl8vR2zac0JiAuO36RGVceUNDf5vEBV/bFkyGY/VAkiSI0qjEa13uCEZul4Qv8CJ/cZ9Wb7Ymu4lO90tDsDZHwuQGgo6zAatWdNKaooM+beFVAnhPameQpSULTYeOeb/Zt5LdBsuK+2C2hbxUvomFAjas+jEqsYRqLYIyWOQWZoHjeryMm8QSJp8JQEQy4aHmsE9Bhc6WYVTrxO1El9hn4v8M3eiUQKBgQDrrHtsU1lnsulHWoVJ4C5gjvj6OGAe4JCwlpg9e/Bj6azKy4Ldkmmdm5iArDcU1N+mMoQxg9HLR9YL29Kry+RI5zp4OowupxENcI3PajL9O4IpwXl7+ZWujkzGlCXVMVD5Qqfyh9qShjgjDVVNOBwzLeXvvZ2YUI32f7ttRM/dhwKBgQDUM2aUxZQjFkLuQpEyAg1px3KKqvXBvaAbqmIyk0HzmkquwTnWJFadxRrmp6X9cAW+1FWlKd3SQnnvADNiHnAFyZn2q/U4Al7Jusy6ZJgsU83wxAkQmoqDkGtJHdlMlkd3ffcGJUDqTH+bT/KAeXjlKH+WZxSMbwfyYz8gMVkwmwKBgHqEYm2ALxxfwDJd9qjfKHz+FqVOJXon2FBVGbPs+J2YX0HV5qR1dv5+YxuRa9kiiVoHLP3ov2nkYHwtvSmeh4D25EiYd0PRimXoO3C2judixloawKMYrx3d0D/zyG86ghPy+Qh2Y8SEji56wfuwzcg1djHZ61HBnuukn7VAbqeFAoGAG4Cl9PY+ouWJuzOped/GOUV+VPafb4LSM4O7wm5Ph/EhaNDmXBjNmRkoyWhFHTndpMQEbamldFDlWNKf1kG3pyhf6haTa7Ty8BZj3myXRHeAI4pk2mANP8wB+7IArep0TMpor8U4SqWrjEeqWHhl8N1029t0UFc7onC2h8edla0CgYB/h078k7MWxrd53NLzCGarer4gvbbqY7IDc4w3kfSc4b9saK6Waizl6ptixp7Sfovzw+xNWhIIftwLZOsBEukVvW8z8moXWGUJ9vNAPq75RdIchc3X985nAgZf2lnbZmGBdPpMXI2oARezDd7ZPOlnLKQHvg+dl9F9Es5H/l9exg=="
+    alipay-public-key: "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAn1wwPdbGdgNh93b8T/YRpzO7vlI/ycWK3SHIy0+F4vtqU/Wigc7445ZfZkExavTJNrRJn2lLObJKG2gazy/oKqZoZpuaVpWOhY89i17k2ZlHRqZ9CM7PqSov2rL+BuP/vxFAE4S437TMutKNLKagpqgRUMRyY1CopIutzzFTBfNivTqz2tlY+GQdOce4f8OEU84A49JbiEPpN0z0o8cOuBtmwh5nZnmxQsU/I/I4+39rom6HbgcvSxSa5YYlFOmTmJjfyC17wdaASEiWT3rI36kACJJB4l7EWGcbiERMLIuxu9bYJitNf2K5uMGrFGsITQNDXnc3aofCFULUyNcgDwIDAQAB"
+    notify-url: http://localhost:8085/pay/api/pay/notify/alipay
+
+  wechat:
+    enabled: false
+    mch-id: ""
+    app-id: ""
+    merchant-private-key: ""
+    serial-no: ""
+    api-v3-key: ""
+    notify-url: http://localhost:8085/pay/api/pay/notify/wechat
 
 # 日志配置
 logging:

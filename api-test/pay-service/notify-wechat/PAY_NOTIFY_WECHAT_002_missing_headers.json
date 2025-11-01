@@ -1,0 +1,7 @@
+{
+  "caseId": "PAY_NOTIFY_WECHAT_002",
+  "title": "微信V3回调-缺少必需头",
+  "api": {"method": "POST", "path": "/pay/api/pay/notify/wechat", "headers": {"Content-Type": "application/json"}},
+  "request": {"resource": {"ciphertext": "X"}},
+  "expected": {"httpStatus": 200, "text": "failure"}
+}

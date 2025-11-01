@@ -1,0 +1,13 @@
+{
+  "caseId": "PAY_QUERY_001",
+  "title": "查询支付-正常",
+  "api": {"method": "GET", "path": "/pay/api/pay/{payNo}"},
+  "request": {
+    "pathParams": {"payNo": "P_REPLACE_ME"}
+  },
+  "expected": {
+    "httpStatus": 200,
+    "body": {"code": "0", "data": {"payNo": "equals:P_REPLACE_ME", "status": "in:[0,1,2,3,4,5]"}}
+  },
+  "notes": ["先创建支付拿到实际 payNo，再替换占位符"]
+}

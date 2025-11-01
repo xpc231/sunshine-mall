@@ -1,0 +1,7 @@
+{
+  "caseId": "PAY_QUERY_003",
+  "title": "查询支付-payNo为空",
+  "api": {"method": "GET", "path": "/pay/api/pay/"},
+  "expected": {"httpStatus": 404},
+  "notes": ["路径变量缺失将返回404；若传空字符串，服务层会返回 SYSTEM_PARAM_ERROR"]
+}

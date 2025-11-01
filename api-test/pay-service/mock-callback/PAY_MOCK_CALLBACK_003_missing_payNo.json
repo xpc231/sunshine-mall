@@ -1,0 +1,12 @@
+{
+  "caseId": "PAY_MOCK_CALLBACK_003",
+  "title": "模拟支付成功回调-缺少payNo",
+  "api": {
+    "method": "POST",
+    "path": "/pay/api/pay/mock/callback",
+    "headers": {"Content-Type": "application/json", "userId": 20001}
+  },
+  "request": {"channelTradeNo": "MOCK-ALIPAY-20250101-0001"},
+  "expected": {"httpStatus": 200, "body": {"code": "SYSTEM_PARAM_ERROR"}},
+  "notes": ["服务层参数校验"]
+}

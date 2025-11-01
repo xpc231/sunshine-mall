@@ -1,0 +1,12 @@
+{
+  "caseId": "PAY_MOCK_CALLBACK_001",
+  "title": "模拟支付成功回调-正常",
+  "api": {
+    "method": "POST",
+    "path": "/pay/api/pay/mock/callback",
+    "headers": {"Content-Type": "application/json", "userId": 20001}
+  },
+  "request": {"payNo": "P_REPLACE_ME", "channelTradeNo": "MOCK-ALIPAY-20250101-0001"},
+  "expected": {"httpStatus": 200, "body": {"code": "0", "data": true}},
+  "notes": ["需先创建支付，替换实际 payNo"]
+}

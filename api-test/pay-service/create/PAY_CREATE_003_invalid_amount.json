@@ -1,0 +1,20 @@
+{
+  "caseId": "PAY_CREATE_003",
+  "title": "创建支付-金额非法(<=0)",
+  "api": {
+    "method": "POST",
+    "path": "/pay/api/pay/create",
+    "headers": {"Content-Type": "application/json", "userId": 20001}
+  },
+  "request": {
+    "orderNo": "ORD202501010004",
+    "amount": 0,
+    "payType": 1,
+    "clientToken": "PAY-ORD202501010004-uuid-001"
+  },
+  "expected": {
+    "httpStatus": 200,
+    "body": {"code": "SYSTEM_PARAM_ERROR", "message": "创建支付参数非法"}
+  },
+  "notes": ["服务层对金额进行校验，抛出业务异常返回200"]
+}

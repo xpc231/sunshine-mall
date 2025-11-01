@@ -1,0 +1,8 @@
+{
+  "caseId": "PAY_NOTIFY_ALIPAY_001",
+  "title": "支付宝回调-TRADE_SUCCESS-正常",
+  "api": {"method": "POST", "path": "/pay/api/pay/notify/alipay", "headers": {"Content-Type": "application/x-www-form-urlencoded"}},
+  "form": {"out_trade_no": "P_REPLACE_ME", "trade_status": "TRADE_SUCCESS", "trade_no": "202501010001"},
+  "expected": {"httpStatus": 200, "text": "success"},
+  "notes": ["需先创建支付并替换实际 payNo"]
+}

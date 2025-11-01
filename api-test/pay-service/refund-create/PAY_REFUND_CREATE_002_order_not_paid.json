@@ -1,0 +1,11 @@
+{
+  "caseId": "PAY_REFUND_CREATE_002",
+  "title": "创建退款-订单未支付或记录缺失",
+  "api": {
+    "method": "POST",
+    "path": "/pay/api/pay/refund/create",
+    "headers": {"Content-Type": "application/json", "userId": 20001}
+  },
+  "request": {"orderNo": "ORD-NOT-PAID-001", "amount": 10.00},
+  "expected": {"httpStatus": 200, "body": {"code": "PAYMENT_FAILED", "message": "订单未支付或支付记录缺失"}}
+}

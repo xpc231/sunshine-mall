@@ -1,0 +1,11 @@
+{
+  "caseId": "PAY_REFUND_CREATE_003",
+  "title": "创建退款-金额非法(<=0)",
+  "api": {
+    "method": "POST",
+    "path": "/pay/api/pay/refund/create",
+    "headers": {"Content-Type": "application/json", "userId": 20001}
+  },
+  "request": {"orderNo": "ORD202501010002", "amount": 0},
+  "expected": {"httpStatus": 200, "body": {"code": "SYSTEM_PARAM_ERROR", "message": "退款参数非法"}}
+}

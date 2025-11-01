@@ -1,0 +1,23 @@
+{
+  "caseId": "PAY_NOTIFY_WECHAT_001",
+  "title": "微信V3回调-支付成功",
+  "api": {
+    "method": "POST",
+    "path": "/pay/api/pay/notify/wechat",
+    "headers": {
+      "Content-Type": "application/json",
+      "Wechatpay-Serial": "SERIAL-MOCK",
+      "Wechatpay-Signature": "SIG-MOCK",
+      "Wechatpay-Timestamp": "1735689600",
+      "Wechatpay-Nonce": "NONCE-MOCK"
+    }
+  },
+  "request": {
+    "out_trade_no": "P_REPLACE_ME",
+    "transaction_id": "MOCK-420000-20250101-0001",
+    "summary": "支付成功",
+    "event_type": "TRANSACTION.SUCCESS"
+  },
+  "expected": {"httpStatus": 200, "text": "success"},
+  "notes": ["当前验签与解密为占位，服务层按幂等记录支付成功"]
+}

@@ -1,0 +1,7 @@
+{
+  "caseId": "PAY_NOTIFY_ALIPAY_003",
+  "title": "支付宝回调-支付记录不存在",
+  "api": {"method": "POST", "path": "/pay/api/pay/notify/alipay", "headers": {"Content-Type": "application/x-www-form-urlencoded"}},
+  "form": {"out_trade_no": "P9999999999", "trade_status": "TRADE_SUCCESS", "trade_no": "202501010001"},
+  "expected": {"httpStatus": 200, "text": "failure"}
+}

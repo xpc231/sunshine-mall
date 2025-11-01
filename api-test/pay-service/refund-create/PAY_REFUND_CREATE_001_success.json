@@ -1,0 +1,12 @@
+{
+  "caseId": "PAY_REFUND_CREATE_001",
+  "title": "创建退款-正常",
+  "preconditions": ["先完成支付成功（创建+回调成功）"],
+  "api": {
+    "method": "POST",
+    "path": "/pay/api/pay/refund/create",
+    "headers": {"Content-Type": "application/json", "userId": 20001}
+  },
+  "request": {"orderNo": "ORD202501010002", "amount": 10.00, "reason": "用户申请退款"},
+  "expected": {"httpStatus": 200, "body": {"code": "0", "data": {"refundNo": "startsWith:R"}}}
+}

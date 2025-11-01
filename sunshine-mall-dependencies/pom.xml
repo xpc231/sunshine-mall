@@ -38,8 +38,11 @@
         <spring-ai.version>1.0.3</spring-ai.version>
         
         <!-- 工具类 -->
-        <hutool.version>5.8.22</hutool.version>
+        <hutool.version>5.7.5</hutool.version>
         <guava.version>32.1.3-jre</guava.version>
+        <zxing.version>3.3.3</zxing.version>
+        <alipay.version>2.2.2</alipay.version>
+
         <fastjson2-extension-spring6.version>2.0.40</fastjson2-extension-spring6.version>
         <jwt.version>4.4.0</jwt.version>
 
@@ -141,7 +144,20 @@
                 <artifactId>guava</artifactId>
                 <version>${guava.version}</version>
             </dependency>
-            
+
+            <!--Google ZXing-->
+            <dependency>
+                <groupId>com.google.zxing</groupId>
+                <artifactId>core</artifactId>
+                <version>${zxing.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.alipay.sdk</groupId>
+                <artifactId>alipay-easysdk</artifactId>
+                <version>${alipay.version}</version>
+            </dependency>
+
             <!-- FastJson2 -->
             <dependency>
                 <groupId>com.alibaba.fastjson2</groupId>
@@ -159,11 +175,13 @@
 
             <!-- ========================= 框架模块 ========================= -->
             <!-- 认证组件 -->
+<!--
             <dependency>
                 <groupId>com.xpcjsu.sunshinemall</groupId>
                 <artifactId>sunshine-mall-framework-auth</artifactId>
                 <version>${project.version}</version>
             </dependency>
+-->
 
             <!-- ========================= 测试相关 ========================= -->
             <!--Spring test-->
