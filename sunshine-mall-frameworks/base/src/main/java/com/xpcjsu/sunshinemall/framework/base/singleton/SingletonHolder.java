@@ -10,9 +10,6 @@ import java.util.function.Supplier;
  * <p>
  * 提供线程安全的单例实例管理，支持自定义初始化逻辑和默认构造器初始化。
  * 基于ConcurrentHashMap实现，保证高并发环境下的性能和安全性。
- * 
- * @author sunshine-mall
- * @since 1.0.0
  */
 //final确保不会被继承
 public final class SingletonHolder {
@@ -41,12 +38,6 @@ public final class SingletonHolder {
      * 优点:调用方可以自定义对象创建逻辑
      *
      * 该方法线程安全，保证同一类型只会创建一个实例。
-     * 
-     * @param clazz    目标类型
-     * @param supplier 实例创建逻辑
-     * @param <T>      泛型类型
-     * @return 单例实例
-     * @throws RuntimeException 如果实例创建失败
      */
     @SuppressWarnings("unchecked")
     public static <T> T getInstance(Class<T> clazz, Supplier<T> supplier) {
@@ -76,11 +67,6 @@ public final class SingletonHolder {
      *
      * 使用反射调用目标类的无参构造器创建实例。
      * 要求目标类必须有可访问的无参构造器。
-     * 
-     * @param clazz 目标类型
-     * @param <T>   泛型类型
-     * @return 单例实例
-     * @throws RuntimeException 如果目标类没有无参构造器或实例创建失败
      */
     //Class - 类对象或类的运行时类型对象
     public static <T> T getInstance(Class<T> clazz) {
@@ -100,9 +86,6 @@ public final class SingletonHolder {
 
     /**
      * 检查指定类型是否已有单例实例
-     * 
-     * @param clazz 目标类型
-     * @return 如果已存在实例返回true，否则返回false
      */
     public static boolean containsInstance(Class<?> clazz) {
         if (clazz == null) {
@@ -115,11 +98,7 @@ public final class SingletonHolder {
      * 移除指定类型的单例实例
      * <p>
      * 注意：此操作会破坏单例语义，谨慎使用，主要用于测试场景。
-     * 
-     * @param clazz 目标类型
-     * @return 被移除的实例，如果不存在返回null
      */
-    @SuppressWarnings("unchecked")
     public static <T> T removeInstance(Class<T> clazz) {
         if (clazz == null) {
             return null;
@@ -127,21 +106,4 @@ public final class SingletonHolder {
         return (T) INSTANCES.remove(clazz);
     }
 
-    /**
-     * 清空所有单例实例
-     * <p>
-     * 注意：此操作会破坏所有单例语义，谨慎使用，主要用于测试场景。
-     */
-    public static void clear() {
-        INSTANCES.clear();
-    }
-
-    /**
-     * 获取当前管理的单例实例数量
-     * 
-     * @return 单例实例数量
-     */
-    public static int size() {
-        return INSTANCES.size();
-    }
 }

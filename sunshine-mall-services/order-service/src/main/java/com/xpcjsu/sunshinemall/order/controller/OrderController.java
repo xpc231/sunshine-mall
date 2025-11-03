@@ -73,12 +73,12 @@ public class OrderController {
 
     /**
      * 从请求中提取用户ID，优先使用网关透传的Header: X-User-Id；
-     * 兼容查询参数 userId；缺失则视为未登录。
+     * 兼容下游服务内部调用的Header: userId；缺失则视为未登录。
      */
     private Long getUserIdFromRequest(HttpServletRequest request) {
-        String userIdHeader = request.getHeader("X-User-Id");
-        String userIdParam = request.getParameter("userId");
-        String userIdStr = StringUtils.hasText(userIdHeader) ? userIdHeader : userIdParam;
+        String userIdHeaderPrimary = request.getHeader("X-User-Id");
+        String userIdHeaderCompat = request.getHeader("userId");
+        String userIdStr = StringUtils.hasText(userIdHeaderPrimary) ? userIdHeaderPrimary : userIdHeaderCompat;
         if (!StringUtils.hasText(userIdStr)) {
             throw new BusinessException(
                     BusinessErrorCode.USER_NOT_LOGIN,

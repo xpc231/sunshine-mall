@@ -173,15 +173,6 @@
                 <version>${jwt.version}</version>
             </dependency>
 
-            <!-- ========================= 框架模块 ========================= -->
-            <!-- 认证组件 -->
-<!--
-            <dependency>
-                <groupId>com.xpcjsu.sunshinemall</groupId>
-                <artifactId>sunshine-mall-framework-auth</artifactId>
-                <version>${project.version}</version>
-            </dependency>
--->
 
             <!-- ========================= 测试相关 ========================= -->
             <!--Spring test-->

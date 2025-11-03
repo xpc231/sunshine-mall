@@ -45,9 +45,7 @@
             <artifactId>sunshine-mall-framework-idempotent</artifactId>
             <version>${project.version}</version>
         </dependency>
-        
-        <!-- 移除本服务内置认证依赖，统一由网关处理认证 -->
-        
+
         <!-- RocketMQ 分布式事务 -->
         <dependency>
             <groupId>org.apache.rocketmq</groupId>
