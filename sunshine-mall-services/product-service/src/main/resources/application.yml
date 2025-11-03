@@ -1,82 +1,12 @@
-# 服务端口
 server:
   port: 8083
 
-# Product Service 应用配置
-spring:
-  application:
-    name: product-service
-  
-  # 数据源配置
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://192.168.100.128:3307/sunshine_mall_product?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
-    username: root
-    password: 123
-  
-  # Redis 配置
-  data:
-    redis:
-      host: 192.168.100.128
-      port: 6379
-      password: 123321
-      database: 0
-      timeout: 3000ms
-      lettuce:
-        pool:
-          max-active: 8
-          max-idle: 8
-          min-idle: 0
-          max-wait: -1ms
-  
-  # Nacos 配置中心
-  cloud:
-    nacos:
-      config:
-        import-check:
-          enabled: false
-      server-addr: 192.168.100.128:8848
 
-# RocketMQ 配置
-rocketmq:
-  name-server: 192.168.100.128:9876
-  producer:
-    group: product-service-producer-group
-    send-message-timeout: 3000
-    retry-times-when-send-failed: 2
+sunshine:
+  db:
+    database: sunshine_mall_product
 
 # 分布式ID配置
 distributed-id:
   datacenter-id: 1
   worker-id: 1
-
-
-# MyBatis-Plus 配置
-mybatis-plus:
-  configuration:
-    # 开启驼峰命名转换
-    map-underscore-to-camel-case: true
-    # 打印 SQL 日志
-    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
-  global-config:
-    db-config:
-      # 逻辑删除字段
-      logic-delete-field: delFlag
-      # 逻辑删除值（已删除）
-      logic-delete-value: 1
-      # 逻辑未删除值（未删除）
-      logic-not-delete-value: 0
-
-# 日志配置
-logging:
-  level:
-    # 业务代码日志级别
-    com.xpcjsu.sunshinemall: INFO
-    # Mapper SQL 日志级别 - DEBUG 才能看到 SQL
-    com.xpcjsu.sunshinemall.product.mapper: DEBUG
-    # MyBatis 日志
-    org.mybatis: DEBUG
-    # Spring 框架日志
-    org.springframework: INFO
-    # Nacos 日志
-    com.alibaba.nacos: INFO
