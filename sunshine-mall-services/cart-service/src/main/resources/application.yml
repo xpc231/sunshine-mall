@@ -1,0 +1,23 @@
+server:
+  port: 8085
+
+feign:
+  okhttp:
+    enabled: true
+
+sunshine:
+  db:
+    database: sunshine_mall_cart
+
+spring:
+  application:
+    name: cart-service
+  cloud:
+    sentinel:
+      transport:
+        dashboard: localhost:8090
+        port: 8719
+      eager: true
+      http-method-specify: true
+
+

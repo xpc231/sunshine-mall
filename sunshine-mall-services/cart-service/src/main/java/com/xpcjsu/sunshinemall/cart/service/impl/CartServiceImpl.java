@@ -1,14 +1,14 @@
-package com.xpcjsu.sunshinemall.order.service.impl;
+package com.xpcjsu.sunshinemall.cart.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.conditions.update.UpdateWrapper;
 import com.xpcjsu.sunshinemall.framework.cache.core.CacheManager;
-import com.xpcjsu.sunshinemall.order.constant.CacheConstants;
-import com.xpcjsu.sunshinemall.order.dto.AddCartItemRequest;
-import com.xpcjsu.sunshinemall.order.dto.UpdateCartItemRequest;
-import com.xpcjsu.sunshinemall.order.entity.CartItem;
-import com.xpcjsu.sunshinemall.order.mapper.CartItemMapper;
-import com.xpcjsu.sunshinemall.order.service.CartService;
+import com.xpcjsu.sunshinemall.cart.constant.CacheConstants;
+import com.xpcjsu.sunshinemall.cart.dto.AddCartItemRequest;
+import com.xpcjsu.sunshinemall.cart.dto.UpdateCartItemRequest;
+import com.xpcjsu.sunshinemall.cart.entity.CartItem;
+import com.xpcjsu.sunshinemall.cart.mapper.CartItemMapper;
+import com.xpcjsu.sunshinemall.cart.service.CartService;
 import com.xpcjsu.sunshinemall.framework.base.exception.ValidationException;
 import com.xpcjsu.sunshinemall.framework.convention.errorcode.BusinessErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -123,23 +123,30 @@ public class CartServiceImpl implements CartService {
         }
     }
 
-    /**
-     * 查询购物车条目列表
-     * @param userId 用户ID
-     * @return 购物车条目列表
-     */
     @Override
     public List<CartItem> listItems(Long userId) {
         if (userId == null) {
             throw new ValidationException(BusinessErrorCode.SYSTEM_PARAM_ERROR, "参数为空：userId");
         }
+
+        // 1. 先从缓存中查询
+        String cacheKey = CacheConstants.CART_ITEM_KEY_PREFIX + userId;
+        List<CartItem> cachedItems = (List<CartItem>) cacheManager.get(cacheKey, CartItem.class);
+
+        if (cachedItems != null && !cachedItems.isEmpty()) {
+            // 缓存命中，直接返回
+            return cachedItems;
+        }
+
+        // 2. 缓存未命中，查询数据库
         List<CartItem> cartItems = cartItemMapper.selectList(new QueryWrapper<CartItem>()
                 .eq("user_id", userId)
                 .orderByDesc("update_time"));
 
-        //添加到缓存中
-        cacheManager.set(CacheConstants.CART_ITEM_KEY_PREFIX + userId, cartItems);
+        // 3. 将查询结果添加到缓存中
+        cacheManager.set(cacheKey, cartItems);
 
         return cartItems;
     }
+
 }

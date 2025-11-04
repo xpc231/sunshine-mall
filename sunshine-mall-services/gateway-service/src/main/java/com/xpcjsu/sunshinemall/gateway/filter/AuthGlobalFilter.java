@@ -1,5 +1,7 @@
 package com.xpcjsu.sunshinemall.gateway.filter;
 
+
+import cn.hutool.core.util.StrUtil;
 import com.xpcjsu.sunshinemall.framework.base.exception.UnauthorizedException;
 import com.xpcjsu.sunshinemall.gateway.config.AuthProperties;
 import com.xpcjsu.sunshinemall.gateway.util.JwtTool;
@@ -15,7 +17,6 @@ import org.springframework.util.AntPathMatcher;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -36,11 +37,14 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
             // 放行
             return chain.filter(exchange);
         }
-        // 3.获取token
-        String token = null;
-        List<String> headers = request.getHeaders().get("authorization");
-        if (headers != null && !headers.isEmpty()) {
-            token = headers.get(0);
+        // 3.获取token（兼容大小写与Bearer前缀）
+        String authHeader = request.getHeaders().getFirst("Authorization");
+        if (StrUtil.isBlank(authHeader)) {
+            authHeader = request.getHeaders().getFirst("authorization");
+        }
+        String token = authHeader;
+        if (StrUtil.isNotBlank(token) && StrUtil.startWithIgnoreCase(token, "Bearer ")) {
+            token = token.substring(7);
         }
         // 4.校验并解析token
         Long userId = null;

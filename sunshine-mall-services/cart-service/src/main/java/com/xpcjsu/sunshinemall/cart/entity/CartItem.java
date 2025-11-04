@@ -1,4 +1,4 @@
-package com.xpcjsu.sunshinemall.order.entity;
+package com.xpcjsu.sunshinemall.cart.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;

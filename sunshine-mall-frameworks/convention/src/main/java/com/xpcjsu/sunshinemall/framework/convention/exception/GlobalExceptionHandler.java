@@ -28,9 +28,6 @@ import java.util.stream.Collectors;
  * <li>MethodArgumentNotValidException：Spring Validation异常（返回400）</li>
  * <li>Exception：未知异常兜底（返回500）</li>
  * </ul>
- * 
- * @author sunshine-mall
- * @since 1.0.0
  */
 @Slf4j
 @RestControllerAdvice

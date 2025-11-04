@@ -1,6 +1,6 @@
-package com.xpcjsu.sunshinemall.order.dto;
+package com.xpcjsu.sunshinemall.cart.dto;
 
-import com.xpcjsu.sunshinemall.order.dto.common.SkuQuantityRequest;
+import com.xpcjsu.sunshinemall.cart.dto.common.SkuQuantityRequest;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

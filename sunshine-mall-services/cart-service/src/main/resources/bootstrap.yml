@@ -1,0 +1,12 @@
+spring:
+
+  cloud:
+    nacos:
+      server-addr: 192.168.100.128
+      config:
+        file-extension: yaml
+        shared-configs:
+          - dataId: shared-jdbc.yaml # 共享MyBatis与数据源配置
+          - dataId: shared-log.yaml  # 共享日志配置
+          - dataId: shared-redis.yaml # 共享Redis配置
+

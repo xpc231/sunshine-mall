@@ -15,3 +15,7 @@ hm:
       - /actuator/health
       - /actuator/info
 
+spring:
+  main:
+    web-application-type: reactive
+

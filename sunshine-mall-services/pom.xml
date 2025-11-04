@@ -20,6 +20,7 @@
         <module>user-service</module>
         <module>product-service</module>
         <module>order-service</module>
+        <module>cart-service</module>
         <module>pay-service</module>
         <module>logistics-service</module>
         <module>ai-service</module>
@@ -55,6 +56,12 @@
             <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+        </dependency>
+
+
         <!--nacos 配置中心-->
         <dependency>
             <groupId>com.alibaba.cloud</groupId>
@@ -84,7 +91,7 @@
             <groupId>io.github.openfeign</groupId>
             <artifactId>feign-okhttp</artifactId>
         </dependency>
-        
+
         <!-- Lombok - 所有微服务都需要 -->
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -98,6 +105,7 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
     </dependencies>
 
 </project>

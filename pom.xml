@@ -2,14 +2,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-<!--    Maven项目的配置文件(POM.xml)的根元素部分：
-    project：Maven项目的根元素
-    xmlns：定义Maven POM命名空间
-    xmlns:xsi：定义XML Schema实例命名空间
-    xsi:schemaLocation：指定POM schema的位置，用于验证XML结构
-    modelVersion：声明POM模型版本为4.0.0
-    这些配置确保了Maven能够正确识别和处理项目配置。-->
-
 
     <groupId>com.xpcjsu</groupId>
     <artifactId>sunshine-mall</artifactId>
@@ -17,13 +9,6 @@
     <packaging>pom</packaging>
     <name>sunshine-mall</name>
     <description>AI驱动分布式电商平台 - 父工程</description>
-<!--    Maven项目的父工程配置：
-    groupId: 项目组ID为com.xpcjsu
-    artifactId: 项目名称为sunshine-mall
-    version: 版本号0.0.1-SNAPSHOT（快照版本）
-    packaging: 打包方式为pom（父工程）
-    name: 项目显示名称
-    description: 项目描述为"AI驱动分布式电商平台 - 父工程"-->
 
     <properties><!--属性配置-->
 
@@ -77,8 +62,7 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            
-            <!-- 项目内部模块版本管理通过各模块自己的dependencyManagement管理 -->
+
         </dependencies>
     </dependencyManagement>
 
