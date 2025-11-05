@@ -4,3 +4,13 @@ server:
 sunshine:
   db:
     database: sunshine_mall_user
+
+spring:
+  application:
+    name: user-service
+
+feign:
+  okhttp:
+    enabled: true
+  sentinel:
+    enabled: true

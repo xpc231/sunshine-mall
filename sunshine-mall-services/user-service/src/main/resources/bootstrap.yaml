@@ -1,6 +1,4 @@
 spring:
-  application:
-    name: user-service
 
   cloud:
     nacos:
@@ -11,4 +9,6 @@ spring:
           - dataId: shared-jdbc.yaml # 共享mybatis配置
           - dataId: shared-log.yaml # 共享日志配置
           - dataId: shared-redis.yaml
+          - dataId: shared-sentinel.yaml
+          - dataId: shared-seata.yaml
 

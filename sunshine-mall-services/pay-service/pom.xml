@@ -74,6 +74,13 @@
             <groupId>com.alipay.sdk</groupId>
             <artifactId>alipay-easysdk</artifactId>
         </dependency>
+
+        <!-- 引入抽取后的通用 Feign 客户端与共享 DTO -->
+        <dependency>
+            <groupId>com.xpcjsu</groupId>
+            <artifactId>sunshine-mall-framework-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

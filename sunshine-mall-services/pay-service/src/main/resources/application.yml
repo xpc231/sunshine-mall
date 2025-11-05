@@ -5,6 +5,11 @@ sunshine:
   db:
     database: sunshine_mall_pay
 
+spring:
+  application:
+    name: pay-service
+
+
 distributed-id:
   datacenter-id: 1
   worker-id: 1
@@ -12,6 +17,8 @@ distributed-id:
 
 feign:
   okhttp:
+    enabled: true
+  sentinel:
     enabled: true
 
 # 支付渠道配置（占位，后续由你在Nacos或本地配置具体密钥）

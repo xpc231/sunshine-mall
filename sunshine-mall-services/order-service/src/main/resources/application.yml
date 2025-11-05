@@ -4,7 +4,13 @@ server:
 feign:
   okhttp:
     enabled: true
+  sentinel:
+    enabled: true
 
 sunshine:
   db:
     database: sunshine_mall_order
+
+spring:
+  application:
+    name: order-service

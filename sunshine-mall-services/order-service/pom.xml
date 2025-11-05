@@ -65,6 +65,13 @@
             <version>5.12.0</version>
             <scope>test</scope>
         </dependency>
+
+        <!-- 引入抽取后的通用 Feign 客户端 -->
+        <dependency>
+            <groupId>com.xpcjsu</groupId>
+            <artifactId>sunshine-mall-framework-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
     </dependencies>
 
     <build>

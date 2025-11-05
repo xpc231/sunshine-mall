@@ -9,4 +9,6 @@ spring:
           - dataId: shared-jdbc.yaml # 共享MyBatis与数据源配置
           - dataId: shared-log.yaml  # 共享日志配置
           - dataId: shared-redis.yaml # 共享Redis配置
+          - dataId: shared-sentinel.yaml
+          - dataId: shared-seata.yaml
 

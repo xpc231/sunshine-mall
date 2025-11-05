@@ -6,6 +6,17 @@ sunshine:
   db:
     database: sunshine_mall_product
 
+spring:
+  application:
+    name: product-service
+
+feign:
+  okhttp:
+    enabled: true
+  sentinel:
+    enabled: true
+
+
 # 分布式ID配置
 distributed-id:
   datacenter-id: 1

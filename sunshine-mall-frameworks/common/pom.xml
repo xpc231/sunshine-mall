@@ -15,6 +15,13 @@
     <description>通用工具模块 - 工具类、线程池管理、枚举定义</description>
 
     <dependencies>
+        <!-- 统一返回结构 -->
+        <dependency>
+            <groupId>com.xpcjsu</groupId>
+            <artifactId>sunshine-mall-framework-convention</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <dependency>
             <groupId>com.xpcjsu</groupId>
             <artifactId>sunshine-mall-framework-base</artifactId>
@@ -30,6 +37,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
+        </dependency>
+
+        <!-- 在 common 模块中编译 Feign 注解接口（不引入 starter，避免自动装配） -->
+        <dependency>
+            <groupId>org.springframework.cloud</groupId>
+            <artifactId>spring-cloud-openfeign-core</artifactId>
         </dependency>
 
         <!--完成SpringMVC自动装配-->

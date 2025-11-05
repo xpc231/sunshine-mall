@@ -4,6 +4,8 @@ server:
 feign:
   okhttp:
     enabled: true
+  sentinel:
+    enabled: true
 
 sunshine:
   db:
@@ -12,12 +14,6 @@ sunshine:
 spring:
   application:
     name: cart-service
-  cloud:
-    sentinel:
-      transport:
-        dashboard: localhost:8090
-        port: 8719
-      eager: true
-      http-method-specify: true
+
 
 
