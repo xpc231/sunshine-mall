@@ -1,7 +1,7 @@
 package com.xpcjsu.sunshinemall.cart.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.xpcjsu.sunshinemall.cart.entity.CartItem;
+import com.xpcjsu.sunshinemall.cart.dto.entity.CartItem;
 import org.apache.ibatis.annotations.Mapper;
 
 /**

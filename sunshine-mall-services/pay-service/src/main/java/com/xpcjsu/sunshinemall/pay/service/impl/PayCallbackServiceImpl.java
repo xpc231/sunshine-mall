@@ -2,11 +2,11 @@ package com.xpcjsu.sunshinemall.pay.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.xpcjsu.sunshinemall.framework.common.feign.clients.OrderClient;
 import com.xpcjsu.sunshinemall.framework.idempotent.annotation.Idempotent;
 import com.xpcjsu.sunshinemall.pay.channel.AlipayChannelService;
 import com.xpcjsu.sunshinemall.pay.channel.WechatChannelService;
-import com.xpcjsu.sunshinemall.pay.client.OrderClient;
-import com.xpcjsu.sunshinemall.pay.dto.OrderPaySuccessRequest;
+import com.xpcjsu.sunshinemall.framework.common.feign.dto.OrderPaySuccessRequest;
 import com.xpcjsu.sunshinemall.pay.entity.PayNotifyLog;
 import com.xpcjsu.sunshinemall.pay.entity.PayTransaction;
 import com.xpcjsu.sunshinemall.pay.enums.PayStatus;

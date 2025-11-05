@@ -2,14 +2,15 @@ package com.xpcjsu.sunshinemall.pay.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.xpcjsu.sunshinemall.framework.base.exception.BusinessException;
+import com.xpcjsu.sunshinemall.framework.common.feign.clients.OrderClient;
 import com.xpcjsu.sunshinemall.framework.convention.errorcode.BusinessErrorCode;
 import com.xpcjsu.sunshinemall.framework.distributedid.core.SnowflakeIdGenerator;
 import com.xpcjsu.sunshinemall.framework.idempotent.annotation.Idempotent;
 import com.xpcjsu.sunshinemall.framework.convention.result.Result;
-import com.xpcjsu.sunshinemall.pay.client.OrderClient;
+import com.xpcjsu.sunshinemall.framework.common.feign.dto.OrderPaySuccessRequest;
 import com.xpcjsu.sunshinemall.pay.channel.AlipayChannelService;
 import com.xpcjsu.sunshinemall.pay.channel.WechatChannelService;
-import com.xpcjsu.sunshinemall.pay.dto.OrderPaySuccessRequest;
+
 import com.xpcjsu.sunshinemall.pay.dto.pay.PayCreateRequest;
 import com.xpcjsu.sunshinemall.pay.dto.pay.PayCreateResponse;
 import com.xpcjsu.sunshinemall.pay.dto.pay.PayMockCallbackRequest;

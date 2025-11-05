@@ -1,6 +1,6 @@
 package com.xpcjsu.sunshinemall.order.dto.order;
 
-import com.xpcjsu.sunshinemall.order.entity.OrderItem;
+import com.xpcjsu.sunshinemall.order.dto.entity.OrderItem;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

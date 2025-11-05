@@ -1,8 +1,8 @@
 package com.xpcjsu.sunshinemall.cart.service;
 
-import com.xpcjsu.sunshinemall.cart.dto.AddCartItemRequest;
-import com.xpcjsu.sunshinemall.cart.dto.UpdateCartItemRequest;
-import com.xpcjsu.sunshinemall.cart.entity.CartItem;
+import com.xpcjsu.sunshinemall.cart.dto.request.AddCartItemRequest;
+import com.xpcjsu.sunshinemall.cart.dto.request.UpdateCartItemRequest;
+import com.xpcjsu.sunshinemall.cart.dto.entity.CartItem;
 
 import java.util.List;
 

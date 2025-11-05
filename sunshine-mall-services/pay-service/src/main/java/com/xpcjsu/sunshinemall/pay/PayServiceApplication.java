@@ -12,7 +12,10 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
  */
 @SpringBootApplication(scanBasePackages = "com.xpcjsu.sunshinemall")
 @EnableDiscoveryClient
-@EnableFeignClients
+@EnableFeignClients(basePackages = {
+        "com.xpcjsu.sunshinemall.pay.client",
+        "com.xpcjsu.sunshinemall.framework.common.feign.clients"
+})
 @EnableTransactionManagement
 @MapperScan("com.xpcjsu.sunshinemall.pay.mapper")
 public class PayServiceApplication {

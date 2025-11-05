@@ -3,8 +3,8 @@ package com.xpcjsu.sunshinemall.order.service;
 import com.xpcjsu.sunshinemall.order.dto.order.OrderCreateRequest;
 import com.xpcjsu.sunshinemall.order.dto.order.OrderCreateResponse;
 import com.xpcjsu.sunshinemall.order.dto.order.OrderDetailResponse;
-import com.xpcjsu.sunshinemall.order.entity.OrderInfo;
-import com.xpcjsu.sunshinemall.order.entity.OrderItem;
+import com.xpcjsu.sunshinemall.order.dto.entity.OrderInfo;
+import com.xpcjsu.sunshinemall.order.dto.entity.OrderItem;
 
 import java.util.List;
 

@@ -7,24 +7,26 @@ import com.xpcjsu.sunshinemall.framework.base.exception.ValidationException;
 import com.xpcjsu.sunshinemall.framework.cache.core.CacheManager;
 import com.xpcjsu.sunshinemall.framework.convention.errorcode.BusinessErrorCode;
 import com.xpcjsu.sunshinemall.framework.idempotent.annotation.Idempotent;
-import com.xpcjsu.sunshinemall.order.client.ProductSkuClient;
-import com.xpcjsu.sunshinemall.order.client.StockClient;
-import com.xpcjsu.sunshinemall.order.constant.CacheConstants;
-import com.xpcjsu.sunshinemall.order.constant.OrderConstants;
-import com.xpcjsu.sunshinemall.order.dto.external.ProductSkuDTO;
+import com.xpcjsu.sunshinemall.framework.common.feign.clients.ProductSkuClient;
+import com.xpcjsu.sunshinemall.framework.common.feign.clients.CartClient;
+import com.xpcjsu.sunshinemall.framework.common.feign.clients.StockClient;
+import com.xpcjsu.sunshinemall.order.dto.constant.CacheConstants;
+import com.xpcjsu.sunshinemall.order.dto.constant.OrderConstants;
+import com.xpcjsu.sunshinemall.framework.common.feign.dto.ProductSkuDTO;
 import com.xpcjsu.sunshinemall.order.dto.order.OrderCreateRequest;
 import com.xpcjsu.sunshinemall.order.dto.order.OrderCreateResponse;
 import com.xpcjsu.sunshinemall.order.dto.order.OrderDetailResponse;
 import com.xpcjsu.sunshinemall.order.dto.common.SkuQuantityRequest;
-import com.xpcjsu.sunshinemall.order.entity.OrderInfo;
-import com.xpcjsu.sunshinemall.order.entity.OrderItem;
-import com.xpcjsu.sunshinemall.order.enums.OrderStatus;
+import com.xpcjsu.sunshinemall.order.dto.entity.OrderInfo;
+import com.xpcjsu.sunshinemall.order.dto.entity.OrderItem;
+import com.xpcjsu.sunshinemall.order.dto.enums.OrderStatus;
 import com.xpcjsu.sunshinemall.order.mapper.OrderInfoMapper;
 import com.xpcjsu.sunshinemall.order.mapper.OrderItemMapper;
 import com.xpcjsu.sunshinemall.order.mq.message.OrderEventMessage;
 import com.xpcjsu.sunshinemall.order.service.OrderService;
 // 移除未使用的状态机依赖，避免不必要的注入与代码膨胀
 import com.xpcjsu.sunshinemall.order.util.OrderIdGenerator;
+import io.seata.spring.annotation.GlobalTransactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -46,6 +48,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderInfoMapper orderInfoMapper;
     private final OrderItemMapper orderItemMapper;
     private final ProductSkuClient productSkuClient;
+    private final CartClient cartClient;
     private final StockClient stockClient;
     private final OrderIdGenerator orderIdGenerator;
     private final RocketMQTemplate rocketMQTemplate;
@@ -54,7 +57,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     @Idempotent(key = "'order:create:' + #userId + ':' + #request.clientToken", prefix = "idempotent", expireTime = 120)
-    @Transactional(rollbackFor = Exception.class)
+    @GlobalTransactional//该注解会自动管理整个调用链路中的分布式事务
     public OrderCreateResponse createOrder(Long userId, OrderCreateRequest request) {
         // 1) 参数校验
         validateCreateOrderRequest(userId, request);
@@ -87,10 +90,26 @@ public class OrderServiceImpl implements OrderService {
         // 7) 持久化（失败释放预占库存）
         persistOrder(order, orderItems, lockedItems, orderId, orderNo);
 
-        // 8) 发送订单创建事件
+        // 8) 删除购物车中相应的条目（不影响订单创建事务；失败仅记录日志）
+        try {
+            for (SkuQuantityRequest itemReq : itemsReq) {
+                Long skuId = itemReq.getSkuId();
+                var removeRes = cartClient.removeItem(userId, skuId);
+                if (removeRes == null || removeRes.isFailure()) {
+                    log.warn("删除购物车失败，userId={}, skuId={}, code={}, msg={}",
+                            userId, skuId,
+                            removeRes == null ? null : removeRes.getCode(),
+                            removeRes == null ? null : removeRes.getMessage());
+                }
+            }
+        } catch (Exception ex) {
+            log.error("调用购物车服务删除条目异常，userId={}, orderNo={}", userId, orderNo, ex);
+        }
+
+        // 9) 发送订单创建事件
         //sendOrderEvent(OrderConstants.MQ.Tags.CREATED, orderId, orderNo, userId);
 
-        // 9) 返回创建结果
+        // 10) 返回创建结果
         return OrderCreateResponse.builder()
                 .orderId(order.getId())
                 .orderNo(order.getOrderNo())

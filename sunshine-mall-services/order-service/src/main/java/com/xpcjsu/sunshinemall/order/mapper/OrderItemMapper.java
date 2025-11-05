@@ -1,7 +1,7 @@
 package com.xpcjsu.sunshinemall.order.mapper;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.xpcjsu.sunshinemall.order.entity.OrderItem;
+import com.xpcjsu.sunshinemall.order.dto.entity.OrderItem;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
