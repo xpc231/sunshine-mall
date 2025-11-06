@@ -13,10 +13,13 @@ import com.xpcjsu.sunshinemall.pay.enums.PayStatus;
 import com.xpcjsu.sunshinemall.pay.mapper.PayNotifyLogMapper;
 import com.xpcjsu.sunshinemall.pay.mapper.PayTransactionMapper;
 import com.xpcjsu.sunshinemall.pay.service.PayCallbackService;
+import com.xpcjsu.sunshinemall.pay.mq.message.PaymentEventMessage;
+import com.xpcjsu.sunshinemall.framework.common.mq.MqConstant;
 import com.xpcjsu.sunshinemall.framework.convention.result.Result;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +36,7 @@ public class PayCallbackServiceImpl implements PayCallbackService {
     private final OrderClient orderClient;
     private final AlipayChannelService alipayChannelService;
     private final WechatChannelService wechatChannelService;
+    private final RocketMQTemplate rocketMQTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
@@ -103,6 +107,9 @@ public class PayCallbackServiceImpl implements PayCallbackService {
                 } catch (Exception ex) {
                     log.error("调用订单服务异常 - orderNo: {}", pay.getOrderNo(), ex);
                 }
+
+                // 发送支付成功事件到MQ（异步通知其他服务）
+                sendPaymentSuccessEvent(pay);
             } else {
                 log.info("支付宝支付已成功，无需重复处理 - paySn: {}", paySn);
             }
@@ -171,6 +178,9 @@ public class PayCallbackServiceImpl implements PayCallbackService {
                 } catch (Exception ex) {
                     log.error("调用订单服务异常 - orderNo: {}", pay.getOrderNo(), ex);
                 }
+
+                // 发送支付成功事件到MQ（异步通知其他服务）
+                sendPaymentSuccessEvent(pay);
             } else {
                 log.info("微信支付已成功，无需重复处理 - paySn: {}", paySn);
             }
@@ -178,6 +188,32 @@ public class PayCallbackServiceImpl implements PayCallbackService {
         } catch (Exception e) {
             log.error("处理微信回调异常", e);
             return false;
+        }
+    }
+
+    /**
+     * 发送支付成功事件到MQ
+     *
+     * @param pay 支付交易记录
+     */
+    private void sendPaymentSuccessEvent(PayTransaction pay) {
+        try {
+            String destination = MqConstant.Order.TOPIC_EVENT + ":" + MqConstant.Order.Tag.PAID;
+            PaymentEventMessage msg = PaymentEventMessage.builder()
+                    .eventType(MqConstant.Order.Tag.PAID)
+                    .paySn(pay.getPaySn())
+                    .orderId(pay.getOrderId())
+                    .orderNo(pay.getOrderNo())
+                    .userId(pay.getUserId())
+                    .amount(pay.getAmount())
+                    .payType(pay.getPayType())
+                    .channelTradeNo(pay.getChannelTradeNo())
+                    .occurTime(LocalDateTime.now())
+                    .build();
+            rocketMQTemplate.syncSend(destination, msg);
+            log.info("支付成功事件已发送到MQ - destination={}, orderNo={}, paySn={}", destination, pay.getOrderNo(), pay.getPaySn());
+        } catch (Exception e) {
+            log.warn("支付成功事件发送到MQ失败 - orderNo={}, paySn={}", pay.getOrderNo(), pay.getPaySn(), e);
         }
     }
 }

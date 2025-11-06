@@ -14,3 +14,13 @@ sunshine:
 spring:
   application:
     name: order-service
+
+# RocketMQ 基础配置（生产者组名以服务维度配置）。name-server 由 Nacos 的 shared-rocketmq.yaml 提供。
+rocketmq:
+  producer:
+    group: order-service-producer-group
+
+# 订单服务MQ相关配置（延迟取消的延迟级别，默认9≈30分钟）
+order:
+  mq:
+    delay-cancel-level: 9

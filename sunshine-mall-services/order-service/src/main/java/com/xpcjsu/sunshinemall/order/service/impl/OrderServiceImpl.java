@@ -12,6 +12,8 @@ import com.xpcjsu.sunshinemall.framework.common.feign.clients.CartClient;
 import com.xpcjsu.sunshinemall.framework.common.feign.clients.StockClient;
 import com.xpcjsu.sunshinemall.order.dto.constant.CacheConstants;
 import com.xpcjsu.sunshinemall.order.dto.constant.OrderConstants;
+import com.xpcjsu.sunshinemall.order.config.OrderMqProperties;
+import com.xpcjsu.sunshinemall.framework.common.mq.MqConstant;
 import com.xpcjsu.sunshinemall.framework.common.feign.dto.ProductSkuDTO;
 import com.xpcjsu.sunshinemall.order.dto.order.OrderCreateRequest;
 import com.xpcjsu.sunshinemall.order.dto.order.OrderCreateResponse;
@@ -52,6 +54,7 @@ public class OrderServiceImpl implements OrderService {
     private final StockClient stockClient;
     private final OrderIdGenerator orderIdGenerator;
     private final RocketMQTemplate rocketMQTemplate;
+    private final OrderMqProperties orderMqProperties;
     private final ObjectMapper objectMapper;
     private final CacheManager cacheManager;
 
@@ -107,7 +110,10 @@ public class OrderServiceImpl implements OrderService {
         }
 
         // 9) 发送订单创建事件
-        //sendOrderEvent(OrderConstants.MQ.Tags.CREATED, orderId, orderNo, userId);
+        sendOrderEvent(MqConstant.Order.Tag.CREATED, orderId, orderNo, userId);
+
+        // 9.1) 发送超时自动取消的延迟消息（默认30分钟，可通过配置项调整）
+        sendOrderTimeoutCancelDelay(orderId, orderNo, userId, orderMqProperties.getDelayCancelLevel());
 
         // 10) 返回创建结果
         return OrderCreateResponse.builder()
@@ -171,7 +177,7 @@ public class OrderServiceImpl implements OrderService {
         orderInfoMapper.updateById(order);
 
         // 4) 发送支付成功事件
-        //sendOrderEvent(OrderConstants.MQ.Tags.PAID, order.getId(), orderNo, userId);
+        sendOrderEvent(MqConstant.Order.Tag.PAID, order.getId(), orderNo, userId);
 
         return true;
     }
@@ -204,7 +210,7 @@ public class OrderServiceImpl implements OrderService {
         orderInfoMapper.updateById(order);
 
         // 4) 发送取消事件
-        //sendOrderEvent(OrderConstants.MQ.Tags.CANCELLED, order.getId(), orderNo, userId);
+        sendOrderEvent(MqConstant.Order.Tag.CANCELLED, order.getId(), orderNo, userId);
 
         return true;
     }
@@ -459,7 +465,7 @@ public class OrderServiceImpl implements OrderService {
 
     //向MQ发送订单事件
     private void sendOrderEvent(String tag, long orderId, String orderNo, Long userId) {
-        String destination = OrderConstants.MQ.ORDER_EVENT_TOPIC + ":" + tag;
+        String destination = MqConstant.Order.TOPIC_EVENT + ":" + tag;
         OrderEventMessage msg = OrderEventMessage.builder()
                 .eventType(tag)
                 .orderId(orderId)
@@ -472,6 +478,35 @@ public class OrderServiceImpl implements OrderService {
             log.info("订单事件已发送: destination={}, orderNo={}", destination, orderNo);
         } catch (Exception e) {
             log.warn("订单事件发送失败，orderNo={}, tag={}", orderNo, tag, e);
+        }
+    }
+
+    /**
+     * 发送超时取消的延迟消息
+     * @param orderId 订单ID
+     * @param orderNo 订单号
+     * @param userId 用户ID
+     * @param delayLevel 延迟级别（RocketMQ内置级别：9约30分钟）
+     */
+    private void sendOrderTimeoutCancelDelay(long orderId, String orderNo, Long userId, int delayLevel) {
+        String destination = MqConstant.Order.TOPIC_DELAY + ":" + MqConstant.Order.Tag.TIMEOUT_CANCELLED;
+        OrderEventMessage payload = OrderEventMessage.builder()
+                .eventType(MqConstant.Order.Tag.TIMEOUT_CANCELLED)
+                .orderId(orderId)
+                .orderNo(orderNo)
+                .userId(userId)
+                .occurTime(LocalDateTime.now())
+                .build();
+
+        try {
+            // 使用 MessageBuilder 构造 Message 对象
+            org.springframework.messaging.Message<OrderEventMessage> message =
+                    org.springframework.messaging.support.MessageBuilder.withPayload(payload).build();
+
+            rocketMQTemplate.syncSend(destination, message, 3000, delayLevel);
+            log.info("延迟取消消息已发送: destination={}, orderNo={}, delayLevel={}", destination, orderNo, delayLevel);
+        } catch (Exception e) {
+            log.warn("延迟取消消息发送失败，orderNo={}, delayLevel={}", orderNo, delayLevel, e);
         }
     }
 

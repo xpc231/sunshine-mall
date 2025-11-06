@@ -26,9 +26,12 @@ import com.xpcjsu.sunshinemall.pay.mapper.PayNotifyLogMapper;
 import com.xpcjsu.sunshinemall.pay.mapper.PayRefundMapper;
 import com.xpcjsu.sunshinemall.pay.mapper.PayTransactionMapper;
 import com.xpcjsu.sunshinemall.pay.service.PayService;
+import com.xpcjsu.sunshinemall.pay.mq.message.PaymentEventMessage;
+import com.xpcjsu.sunshinemall.framework.common.mq.MqConstant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -50,6 +53,7 @@ public class PayServiceImpl implements PayService {
 
     private final AlipayChannelService alipayChannelService;
     private final WechatChannelService wechatChannelService;
+    private final RocketMQTemplate rocketMQTemplate;
 
     /**
      * 创建支付订单，并根据支付类型调用对应渠道的预下单接口生成支付链接。
@@ -195,7 +199,7 @@ public class PayServiceImpl implements PayService {
                 .build();
         payNotifyLogMapper.insert(logEntity);
 
-        // 3) 通知订单服务（支付成功）
+        // 3) 通知订单服务（支付成功）- 通过Feign同步调用
         try {
             OrderPaySuccessRequest orderReq = OrderPaySuccessRequest.builder()
                     .orderNo(pay.getOrderNo())
@@ -212,6 +216,9 @@ public class PayServiceImpl implements PayService {
         } catch (Exception ex) {
             log.error("调用订单服务异常 - orderNo: {}", pay.getOrderNo(), ex);
         }
+
+        // 4) 发送支付成功事件到MQ（异步通知其他服务）
+        sendPaymentSuccessEvent(pay);
 
         return true;
     }
@@ -313,5 +320,31 @@ public class PayServiceImpl implements PayService {
                 .refundNo(refundSn)
                 .status(refund.getStatus())
                 .build();
+    }
+
+    /**
+     * 发送支付成功事件到MQ
+     *
+     * @param pay 支付交易记录
+     */
+    private void sendPaymentSuccessEvent(PayTransaction pay) {
+        try {
+            String destination = MqConstant.Order.TOPIC_EVENT + ":" + MqConstant.Order.Tag.PAID;
+            PaymentEventMessage msg = PaymentEventMessage.builder()
+                    .eventType(MqConstant.Order.Tag.PAID)
+                    .paySn(pay.getPaySn())
+                    .orderId(pay.getOrderId())
+                    .orderNo(pay.getOrderNo())
+                    .userId(pay.getUserId())
+                    .amount(pay.getAmount())
+                    .payType(pay.getPayType())
+                    .channelTradeNo(pay.getChannelTradeNo())
+                    .occurTime(LocalDateTime.now())
+                    .build();
+            rocketMQTemplate.syncSend(destination, msg);
+            log.info("支付成功事件已发送到MQ - destination={}, orderNo={}, paySn={}", destination, pay.getOrderNo(), pay.getPaySn());
+        } catch (Exception e) {
+            log.warn("支付成功事件发送到MQ失败 - orderNo={}, paySn={}", pay.getOrderNo(), pay.getPaySn(), e);
+        }
     }
 }

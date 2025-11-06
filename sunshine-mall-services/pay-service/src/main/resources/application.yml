@@ -21,6 +21,11 @@ feign:
   sentinel:
     enabled: true
 
+# RocketMQ 基础配置（生产者组名以服务维度配置）。name-server 由 Nacos 的 shared-rocketmq.yaml 提供。
+rocketmq:
+  producer:
+    group: pay-service-producer-group
+
 # 支付渠道配置（占位，后续由你在Nacos或本地配置具体密钥）
 alipay:
   easy:
