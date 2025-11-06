@@ -4,6 +4,7 @@ import com.xpcjsu.sunshinemall.framework.cache.constant.CacheConstant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Component;
 
 import java.util.*;
@@ -13,9 +14,7 @@ import java.util.concurrent.TimeUnit;
  * 缓存管理器
  * <p>
  * 提供统一的Redis缓存操作接口，封装常用的缓存操作。
- * 
- * @author sunshine-mall
- * @since 1.0.0
+ *
  */
 
 
@@ -24,14 +23,10 @@ import java.util.concurrent.TimeUnit;
 @RequiredArgsConstructor
 public class CacheManager {
 
-    //若一个类只有一个构造方法，Spring会自动通过该构造方法注入依赖（无需 @Autowired）
     private final RedisTemplate<String, Object> redisTemplate;
 
     /**
      * 设置缓存（使用默认过期时间）
-     *
-     * @param key   缓存键
-     * @param value 缓存值
      */
     public void set(String key, Object value) {
         set(key, value, CacheConstant.DEFAULT_EXPIRE_TIME);
@@ -39,10 +34,6 @@ public class CacheManager {
 
     /**
      * 设置缓存（指定过期时间）
-     *
-     * @param key        缓存键
-     * @param value      缓存值
-     * @param expireTime 过期时间（秒）
      */
     public void set(String key, Object value, long expireTime) {
         try {
@@ -63,9 +54,6 @@ public class CacheManager {
 
     /**
      * 获取缓存
-     *
-     * @param key 缓存键
-     * @return 缓存值
      */
     public Object get(String key) {
         try {
@@ -82,11 +70,6 @@ public class CacheManager {
 
     /**
      * 获取缓存（带类型转换）
-     *
-     * @param key   缓存键
-     * @param clazz 目标类型
-     * @param <T>   泛型类型
-     * @return 缓存值
      */
     //使用泛型方法获取缓存,强约束，避免类型转换异常
     public <T> T get(String key, Class<T> clazz) {
@@ -114,10 +97,6 @@ public class CacheManager {
      * 删除缓存
      * <p>
      * 注意：删除失败会抛出异常，因为可能导致脏数据残留
-     *
-     * @param key 缓存键
-     * @return 是否删除成功（true:删除成功或key不存在, false:其他情况）
-     * @throws RuntimeException 删除操作失败时
      */
     public Boolean delete(String key) {
         try {
@@ -134,10 +113,6 @@ public class CacheManager {
      * 批量删除缓存
      * <p>
      * 注意：删除失败会抛出异常，因为可能导致脏数据残留
-     *
-     * @param keys 缓存键集合
-     * @return 删除的数量
-     * @throws RuntimeException 删除操作失败时
      */
     public Long delete(Collection<String> keys) {
         if (keys == null || keys.isEmpty()) {
@@ -158,8 +133,6 @@ public class CacheManager {
      * 设置空值缓存（防止缓存穿透）
      * <p>
      * 使用默认过期时间（5分钟）
-     *
-     * @param key 缓存键
      */
     public void setNullValue(String key) {
         setNullValue(key, CacheConstant.NULL_VALUE_EXPIRE_TIME);
@@ -174,9 +147,6 @@ public class CacheManager {
      * <li>低频查询的不存在数据：设置较短时间（1-3分钟）</li>
      * <li>可能很快创建的数据：设置很短时间（30秒-1分钟）</li>
      * </ul>
-     *
-     * @param key        缓存键
-     * @param expireTime 过期时间（秒）
      */
     public void setNullValue(String key, long expireTime) {
         set(key, CacheConstant.NULL_VALUE, expireTime);
@@ -185,9 +155,6 @@ public class CacheManager {
 
     /**
      * 批量获取缓存
-     *
-     * @param keys 缓存键集合
-     * @return 缓存值列表
      */
     public List<Object> multiGet(Collection<String> keys) {
         if (keys == null || keys.isEmpty()) {
@@ -207,11 +174,6 @@ public class CacheManager {
      * <p>
      * 基于Redis的SETNX命令，用于实现分布式锁和幂等性控制。
      * 原子操作，线程安全。
-     *
-     * @param key        缓存键
-     * @param value      缓存值
-     * @param expireTime 过期时间（秒）
-     * @return true:设置成功, false:key已存在
      */
     public Boolean setIfAbsent(String key, Object value, long expireTime) {
         try {
@@ -232,9 +194,6 @@ public class CacheManager {
 
     /**
      * 检查缓存键是否存在
-     *
-     * @param key 缓存键
-     * @return true:存在, false:不存在
      */
     public Boolean hasKey(String key) {
         try {
@@ -248,10 +207,6 @@ public class CacheManager {
 
     /**
      * 自增操作
-     *
-     * @param key   缓存键
-     * @param delta 增量值
-     * @return 自增后的值
      */
     public Long increment(String key, long delta) {
         try {
@@ -264,10 +219,6 @@ public class CacheManager {
 
     /**
      * 自减操作
-     *
-     * @param key   缓存键
-     * @param delta 减量值
-     * @return 自减后的值
      */
     public Long decrement(String key, long delta) {
         try {
@@ -277,5 +228,45 @@ public class CacheManager {
             //对于可能影响数据一致性的操作都采用抛出异常的方式
             throw new RuntimeException("自减操作失败", e);
         }
+    }
+
+    /**
+     * 执行Lua脚本
+     * <p>
+     * 用于实现复杂的原子操作，如秒杀库存扣减等场景
+     */
+    public Object executeScript(String script, List<String> keys, List<Object> args) {
+        try {
+            // 创建并配置Redis脚本对象
+            DefaultRedisScript<Long> redisScript = new DefaultRedisScript<>();
+            redisScript.setScriptText(script);
+            redisScript.setResultType(Long.class);
+            // 执行Lua脚本
+            Long result = redisTemplate.execute(redisScript, keys, args.toArray());
+
+            log.debug("执行Lua脚本成功 - keys: {}, args: {}, result: {}", keys, args, result);
+            return result;
+
+        } catch (Exception e) {
+
+            log.error("执行Lua脚本失败 - keys: {}, args: {}", keys, args, e);
+            throw new RuntimeException("执行Lua脚本失败", e);
+        }
+    }
+
+    /**
+     * 执行Lua脚本（返回Long类型）
+     */
+    public Long executeScriptAsLong(String script, List<String> keys, List<Object> args) {
+
+        Object result = executeScript(script, keys, args);
+
+        if (result instanceof Long) {
+            return (Long) result;
+        } else if (result instanceof Number) {
+            return ((Number) result).longValue();
+        }
+
+        throw new RuntimeException("Lua脚本返回类型错误，期望Long类型");
     }
 }

@@ -71,12 +71,37 @@ public interface SeckillProductService {
 
     /**
      * 扣减秒杀库存
+     * <p>
+     * 双重防护机制：
+     * 1. Redis预扣减（Lua脚本保证原子性）
+     * 2. 数据库扣减（最终保障）
      *
      * @param id       秒杀商品ID
      * @param quantity 扣减数量
      * @return 是否成功
      */
     boolean deductSeckillStock(Long id, Integer quantity);
+
+    /**
+     * 预热秒杀库存到Redis
+     * <p>
+     * 在秒杀活动开始前调用，将数据库中的库存加载到Redis
+     *
+     * @param id 秒杀商品ID
+     * @return 是否成功
+     */
+    boolean warmupSeckillStock(Long id);
+
+    /**
+     * 回滚秒杀库存（增加库存）
+     * <p>
+     * 用于订单创建失败时回滚库存
+     *
+     * @param id       秒杀商品ID
+     * @param quantity 回滚数量
+     * @return 是否成功
+     */
+    boolean rollbackSeckillStock(Long id, Integer quantity);
 
 }
 

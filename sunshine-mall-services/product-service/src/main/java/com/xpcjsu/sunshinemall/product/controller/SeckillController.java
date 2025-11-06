@@ -94,5 +94,37 @@ public class SeckillController {
         return Result.success(list);
     }
 
+    /**
+     * 扣减秒杀库存
+     */
+    @PostMapping("/product/{id}/deduct-stock")
+    public Result<Void> deductSeckillStock(@PathVariable Long id,
+                                          @RequestParam Integer quantity) {
+        boolean success = seckillProductService.deductSeckillStock(id, quantity);
+        return success ? Result.success(null, "扣减成功")
+                       : Result.failure("DEDUCT_FAILED", "扣减失败");
+    }
+
+    /**
+     * 预热秒杀库存到Redis
+     */
+    @PostMapping("/product/{id}/warmup-stock")
+    public Result<Void> warmupSeckillStock(@PathVariable Long id) {
+        boolean success = seckillProductService.warmupSeckillStock(id);
+        return success ? Result.success(null, "预热成功")
+                       : Result.failure("WARMUP_FAILED", "预热失败");
+    }
+
+    /**
+     * 回滚秒杀库存
+     */
+    @PostMapping("/product/{id}/rollback-stock")
+    public Result<Void> rollbackSeckillStock(@PathVariable Long id,
+                                             @RequestParam Integer quantity) {
+        boolean success = seckillProductService.rollbackSeckillStock(id, quantity);
+        return success ? Result.success(null, "回滚成功")
+                       : Result.failure("ROLLBACK_FAILED", "回滚失败");
+    }
+
 }
 

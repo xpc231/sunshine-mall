@@ -99,6 +99,9 @@ public class ProductConstants {
         
         /** 库存缓存过期时间（秒） */
         public static final long STOCK_CACHE_EXPIRE = 1800L;
+
+        /** 秒杀库存缓存前缀 */
+        public static final String SECKILL_STOCK_KEY_PREFIX = "seckill:stock:";
     }
 
     /**

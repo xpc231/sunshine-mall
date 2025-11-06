@@ -59,6 +59,7 @@ public class OrderServiceImpl implements OrderService {
     // private final OrderMqProperties orderMqProperties;
     private final ObjectMapper objectMapper;
     private final CacheManager cacheManager;
+    private final com.xpcjsu.sunshinemall.order.handler.SeckillOrderHandler seckillOrderHandler;
 
     @Override
     @Idempotent(key = "'order:create:' + #userId + ':' + #request.clientToken", prefix = "idempotent", expireTime = 120)
@@ -68,20 +69,27 @@ public class OrderServiceImpl implements OrderService {
         validateCreateOrderRequest(userId, request);
 
         List<SkuQuantityRequest> itemsReq = request.getItems();
+        
+        // 1.1) 如果是秒杀订单，先进行秒杀相关校验和记录创建
+        java.util.Map<String, Object> seckillProductInfo = null;
+        if (request.getOrderType() != null && request.getOrderType() == 1) {
+            seckillProductInfo = seckillOrderHandler.handleSeckillOrderPreCheck(userId, itemsReq);
+        }
+        
         // 2) 查询SKU并校验状态与库存
-        List<ProductSkuDTO> skuList = fetchAndValidateSkus(itemsReq);
+        List<ProductSkuDTO> skuList = fetchAndValidateSkus(itemsReq, request.getOrderType(), seckillProductInfo);
 
         // 3) 生成订单ID/订单号
         //外部交互使用 orderNo, 内部使用 orderId
         long orderId = orderIdGenerator.nextId();
         String orderNo = "O" + orderId;
 
-        // 4) 预占库存
-        List<SkuQuantityRequest> lockedItems = preLockStock(itemsReq, orderId, orderNo);
+        // 4) 预占库存（普通订单）或扣减秒杀库存（秒杀订单）
+        List<SkuQuantityRequest> lockedItems = preLockStock(itemsReq, orderId, orderNo, request.getOrderType(), seckillProductInfo);
 
-        // 5) 构建订单项
+        // 5) 构建订单项（秒杀订单使用秒杀价格）
         LocalDateTime now = LocalDateTime.now();
-        List<OrderItem> orderItems = buildOrderItems(orderId, orderNo, itemsReq, skuList, now);
+        List<OrderItem> orderItems = buildOrderItems(orderId, orderNo, itemsReq, skuList, now, request.getOrderType(), seckillProductInfo);
         BigDecimal totalAmount = computeTotalAmount(orderItems);
 
         BigDecimal freightAmount = BigDecimal.ZERO; // TODO: 运费可根据规则计算
@@ -92,8 +100,13 @@ public class OrderServiceImpl implements OrderService {
         OrderInfo order = buildOrderInfo(orderId, orderNo, userId, totalAmount, payAmount,
                 freightAmount, discountAmount, request, now);
 
-        // 7) 持久化（失败释放预占库存）
-        persistOrder(order, orderItems, lockedItems, orderId, orderNo);
+        // 7) 持久化（失败释放预占库存或回滚秒杀库存）
+        persistOrder(order, orderItems, lockedItems, orderId, orderNo, request.getOrderType(), seckillProductInfo);
+
+        // 7.1) 如果是秒杀订单，更新秒杀订单记录关联订单信息
+        if (seckillProductInfo != null) {
+            seckillOrderHandler.updateSeckillOrderRecord(seckillProductInfo, orderId, orderNo);
+        }
 
         // 8) 删除购物车中相应的条目（不影响订单创建事务；失败仅记录日志）
         try {
@@ -258,7 +271,9 @@ public class OrderServiceImpl implements OrderService {
     }
 
     // 获取商品SKU信息
-    private List<ProductSkuDTO> fetchAndValidateSkus(List<SkuQuantityRequest> itemsReq) {
+    private List<ProductSkuDTO> fetchAndValidateSkus(List<SkuQuantityRequest> itemsReq, 
+                                                      Integer orderType,
+                                                      java.util.Map<String, Object> seckillProductInfo) {
 
         List<ProductSkuDTO> skuList = new ArrayList<>();
 
@@ -276,26 +291,40 @@ public class OrderServiceImpl implements OrderService {
                 throw new BusinessException(BusinessErrorCode.PRODUCT_OFFLINE, "SKU已下架或禁用");
             }
 
-            var checkRes = stockClient.checkStock(skuId, itemReq.getQuantity());
-            if (checkRes == null || checkRes.isFailure()) {
-                throw new BusinessException(BusinessErrorCode.SYSTEM_BUSY, "库存服务繁忙，请稍后重试");
-            }
+            // 如果是秒杀订单，不检查普通库存（秒杀库存已在handleSeckillOrderPreCheck中检查）
+            if (orderType == null || orderType != 1) {
+                var checkRes = stockClient.checkStock(skuId, itemReq.getQuantity());
+                if (checkRes == null || checkRes.isFailure()) {
+                    throw new BusinessException(BusinessErrorCode.SYSTEM_BUSY, "库存服务繁忙，请稍后重试");
+                }
 
-            if (!Boolean.TRUE.equals(checkRes.getData())) {
-                throw new BusinessException(BusinessErrorCode.PRODUCT_INSUFFICIENT_STOCK, "库存不足，skuId=" + skuId);
+                if (!Boolean.TRUE.equals(checkRes.getData())) {
+                    throw new BusinessException(BusinessErrorCode.PRODUCT_INSUFFICIENT_STOCK, "库存不足，skuId=" + skuId);
+                }
             }
             skuList.add(skuDTO);
         }
         return skuList;
     }
 
-    // 预占库存
+    // 预占库存（普通订单）或扣减秒杀库存（秒杀订单）
     private List<SkuQuantityRequest> preLockStock(List<SkuQuantityRequest> itemsReq,
-                                                  long orderId, String orderNo) {
+                                                  long orderId, String orderNo,
+                                                  Integer orderType,
+                                                  java.util.Map<String, Object> seckillProductInfo) {
 
         List<SkuQuantityRequest> lockedItems = new ArrayList<>();
 
         try {
+            // 如果是秒杀订单，直接扣减秒杀库存
+            if (orderType != null && orderType == 1 && seckillProductInfo != null) {
+                SkuQuantityRequest itemReq = itemsReq.get(0);
+                seckillOrderHandler.deductSeckillStock(seckillProductInfo, itemReq.getQuantity());
+                lockedItems.add(itemReq);
+                return lockedItems;
+            }
+
+            // 普通订单：预占库存
             for (SkuQuantityRequest itemReq : itemsReq) {
 
                 var lockRes = stockClient.lockStock(itemReq.getSkuId(),
@@ -334,7 +363,8 @@ public class OrderServiceImpl implements OrderService {
     //统计各个sku的金额
     private List<OrderItem> buildOrderItems(long orderId, String orderNo,
                                             List<SkuQuantityRequest> itemsReq, List<ProductSkuDTO> skuList,
-                                            LocalDateTime now) {
+                                            LocalDateTime now, Integer orderType,
+                                            java.util.Map<String, Object> seckillProductInfo) {
 
         List<OrderItem> orderItems = new ArrayList<>();
 
@@ -343,7 +373,16 @@ public class OrderServiceImpl implements OrderService {
             SkuQuantityRequest itemReq = itemsReq.get(i);
             ProductSkuDTO skuDTO = skuList.get(i);
 
-            BigDecimal price = skuDTO.getPrice() == null ? BigDecimal.ZERO : skuDTO.getPrice();
+            // 如果是秒杀订单，使用秒杀价格；否则使用SKU原价
+            BigDecimal price;
+            if (orderType != null && orderType == 1 && seckillProductInfo != null) {
+                price = seckillOrderHandler.getSeckillPrice(seckillProductInfo);
+                if (price == null) {
+                    price = skuDTO.getPrice() == null ? BigDecimal.ZERO : skuDTO.getPrice();
+                }
+            } else {
+                price = skuDTO.getPrice() == null ? BigDecimal.ZERO : skuDTO.getPrice();
+            }
             BigDecimal itemTotal = price.multiply(BigDecimal.valueOf(itemReq.getQuantity()));
 
             String specJson = safeJson(skuDTO.getSpecMap());
@@ -431,7 +470,8 @@ public class OrderServiceImpl implements OrderService {
 
     //存储订单
     private void persistOrder(OrderInfo order, List<OrderItem> orderItems,
-                              List<SkuQuantityRequest> lockedItems, long orderId, String orderNo) {
+                              List<SkuQuantityRequest> lockedItems, long orderId, String orderNo,
+                              Integer orderType, java.util.Map<String, Object> seckillProductInfo) {
         try {
             orderInfoMapper.insert(order);
 
@@ -440,14 +480,24 @@ public class OrderServiceImpl implements OrderService {
             }
 
         } catch (Exception e) {
-
-            for (SkuQuantityRequest locked : lockedItems) {
+            // 如果是秒杀订单，需要回滚秒杀库存（秒杀库存是直接扣减的，需要回滚）
+            if (orderType != null && orderType == 1 && seckillProductInfo != null && !lockedItems.isEmpty()) {
+                SkuQuantityRequest item = lockedItems.get(0);
                 try {
-                    stockClient.unlockStock(locked.getSkuId(), locked.getQuantity(),
-                            orderId, "DB_FAIL:" + orderNo);
+                    seckillOrderHandler.rollbackSeckillStock(seckillProductInfo, item.getQuantity());
                 } catch (Exception ex) {
-                    log.warn("DB失败释放库存异常，skuId={}, qty={}, orderId={}", locked.getSkuId(),
-                            locked.getQuantity(), orderId);
+                    log.warn("DB失败回滚秒杀库存异常，orderId={}, quantity={}", orderId, item.getQuantity(), ex);
+                }
+            } else {
+                // 普通订单：释放预占库存
+                for (SkuQuantityRequest locked : lockedItems) {
+                    try {
+                        stockClient.unlockStock(locked.getSkuId(), locked.getQuantity(),
+                                orderId, "DB_FAIL:" + orderNo);
+                    } catch (Exception ex) {
+                        log.warn("DB失败释放库存异常，skuId={}, qty={}, orderId={}", locked.getSkuId(),
+                                locked.getQuantity(), orderId);
+                    }
                 }
             }
 
