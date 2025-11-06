@@ -15,7 +15,6 @@
     <description>通用工具模块 - 工具类、线程池管理、枚举定义</description>
 
     <dependencies>
-        <!-- 统一返回结构 -->
         <dependency>
             <groupId>com.xpcjsu</groupId>
             <artifactId>sunshine-mall-framework-convention</artifactId>

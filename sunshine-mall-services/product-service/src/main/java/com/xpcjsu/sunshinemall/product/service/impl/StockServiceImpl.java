@@ -16,8 +16,9 @@ import com.xpcjsu.sunshinemall.product.entity.StockLog;
 import com.xpcjsu.sunshinemall.framework.idempotent.annotation.Idempotent;
 import com.xpcjsu.sunshinemall.product.mapper.ProductStockMapper;
 import com.xpcjsu.sunshinemall.product.mapper.StockLogMapper;
-import com.xpcjsu.sunshinemall.product.mq.message.StockChangeMessage;
-import com.xpcjsu.sunshinemall.product.mq.producer.StockChangeProducer;
+// RocketMQ已禁用，改用OpenFeign远程调用
+// import com.xpcjsu.sunshinemall.product.mq.message.StockChangeMessage;
+// import com.xpcjsu.sunshinemall.product.mq.producer.StockChangeProducer;
 import com.xpcjsu.sunshinemall.product.service.StockService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,7 +40,8 @@ public class StockServiceImpl implements StockService {
     private final StockLogMapper stockLogMapper;
     private final CacheManager cacheManager;
     private final SnowflakeIdGenerator idGenerator;
-    private final StockChangeProducer stockChangeProducer;
+    // RocketMQ已禁用，改用OpenFeign远程调用
+    // private final StockChangeProducer stockChangeProducer;
 
     /** 库存扣减最大重试次数 */
     private static final int MAX_RETRY_TIMES = 3;
@@ -82,11 +84,12 @@ public class StockServiceImpl implements StockService {
         int inserted = productStockMapper.insert(stock);
         
         if (inserted > 0) {
-            // 记录操作日志和发送消息
+            // 记录操作日志
             recordStockLog(skuId, ProductConstants.StockOperationType.IN_STOCK, 
                          quantity, 0, quantity, null, "初始化库存");
-            sendStockChangeMessage(skuId, ProductConstants.StockOperationType.IN_STOCK, 
-                                 quantity, 0, quantity, null, "初始化库存");
+            // RocketMQ已禁用，改用OpenFeign远程调用
+            // sendStockChangeMessage(skuId, ProductConstants.StockOperationType.IN_STOCK, 
+            //                      quantity, 0, quantity, null, "初始化库存");
             log.info("初始化库存成功 - skuId: {}, quantity: {}", skuId, quantity);
         }
         
@@ -427,9 +430,12 @@ public class StockServiceImpl implements StockService {
         log.debug("清除库存缓存 - skuId: {}", skuId);
     }
 
-    /**
+    // RocketMQ已禁用，改用OpenFeign远程调用
+    // 如需通知其他服务库存变更，请使用Feign客户端进行同步调用
+    /*
+    *//**
      * 发送库存变更消息
-     */
+     *//*
     private void sendStockChangeMessage(Long skuId, Integer operationType, Integer quantity,
                                        Integer beforeStock, Integer afterStock,
                                        Long orderId, String remark) {
@@ -439,5 +445,6 @@ public class StockServiceImpl implements StockService {
         );
         stockChangeProducer.sendStockChangeMessage(message);
     }
+    */
 
 }

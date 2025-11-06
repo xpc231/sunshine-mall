@@ -1,5 +1,8 @@
 package com.xpcjsu.sunshinemall.order.mq.consumer;
 
+// RocketMQ已禁用，改用OpenFeign远程调用
+// 订单超时取消功能可改用定时任务实现，扫描待支付订单并自动取消
+/*
 import com.xpcjsu.sunshinemall.order.dto.constant.OrderConstants;
 import com.xpcjsu.sunshinemall.framework.common.mq.MqConstant;
 import com.xpcjsu.sunshinemall.order.mq.message.OrderEventMessage;
@@ -10,9 +13,11 @@ import org.apache.rocketmq.spring.annotation.RocketMQMessageListener;
 import org.apache.rocketmq.spring.core.RocketMQListener;
 import org.springframework.stereotype.Component;
 
-/**
+*//**
  * 订单超时取消消费者：监听延迟消息，在到期未支付时自动取消订单
- */
+ * 
+ * 注意：RocketMQ已禁用，可改用定时任务实现订单超时自动取消
+ *//*
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -43,3 +48,4 @@ public class OrderTimeoutCancelConsumer implements RocketMQListener<OrderEventMe
         }
     }
 }
+*/

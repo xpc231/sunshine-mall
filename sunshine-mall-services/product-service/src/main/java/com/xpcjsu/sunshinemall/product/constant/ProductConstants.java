@@ -112,4 +112,21 @@ public class ProductConstants {
         public static final String PRODUCT_STATUS_TOPIC = "product-status-topic";
     }
 
+    /**
+     * 秒杀商品状态常量
+     */
+    public static class SeckillStatus {
+        /** 未开始 */
+        public static final Integer NOT_STARTED = 0;
+        
+        /** 进行中 */
+        public static final Integer IN_PROGRESS = 1;
+        
+        /** 已结束 */
+        public static final Integer ENDED = 2;
+        
+        /** 已取消 */
+        public static final Integer CANCELLED = 3;
+    }
+
 }

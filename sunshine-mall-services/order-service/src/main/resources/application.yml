@@ -23,4 +23,4 @@ rocketmq:
 # 订单服务MQ相关配置（延迟取消的延迟级别，默认9≈30分钟）
 order:
   mq:
-    delay-cancel-level: 9
+    delay-cancel-level: 3

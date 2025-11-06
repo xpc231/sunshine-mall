@@ -109,6 +109,7 @@ CREATE TABLE `stock_log` (
     KEY `idx_create_time` (`create_time`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='库存操作日志表';
 
+
 -- ==========================================
 -- 初始化测试数据
 -- ==========================================

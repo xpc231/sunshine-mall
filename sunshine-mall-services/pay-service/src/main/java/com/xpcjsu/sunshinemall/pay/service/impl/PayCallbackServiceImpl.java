@@ -19,7 +19,8 @@ import com.xpcjsu.sunshinemall.framework.convention.result.Result;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
+// RocketMQ已禁用，改用OpenFeign远程调用
+// import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -36,7 +37,8 @@ public class PayCallbackServiceImpl implements PayCallbackService {
     private final OrderClient orderClient;
     private final AlipayChannelService alipayChannelService;
     private final WechatChannelService wechatChannelService;
-    private final RocketMQTemplate rocketMQTemplate;
+    // RocketMQ已禁用，改用OpenFeign远程调用
+    // private final RocketMQTemplate rocketMQTemplate;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     @Override
@@ -108,8 +110,9 @@ public class PayCallbackServiceImpl implements PayCallbackService {
                     log.error("调用订单服务异常 - orderNo: {}", pay.getOrderNo(), ex);
                 }
 
-                // 发送支付成功事件到MQ（异步通知其他服务）
-                sendPaymentSuccessEvent(pay);
+                // 发送支付成功事件到MQ - RocketMQ已禁用，改用OpenFeign远程调用
+                // 支付成功通知已通过Feign同步通知订单服务，如需通知其他服务请使用Feign客户端
+                // sendPaymentSuccessEvent(pay);
             } else {
                 log.info("支付宝支付已成功，无需重复处理 - paySn: {}", paySn);
             }
@@ -179,8 +182,9 @@ public class PayCallbackServiceImpl implements PayCallbackService {
                     log.error("调用订单服务异常 - orderNo: {}", pay.getOrderNo(), ex);
                 }
 
-                // 发送支付成功事件到MQ（异步通知其他服务）
-                sendPaymentSuccessEvent(pay);
+                // 发送支付成功事件到MQ - RocketMQ已禁用，改用OpenFeign远程调用
+                // 支付成功通知已通过Feign同步通知订单服务，如需通知其他服务请使用Feign客户端
+                // sendPaymentSuccessEvent(pay);
             } else {
                 log.info("微信支付已成功，无需重复处理 - paySn: {}", paySn);
             }
@@ -191,11 +195,14 @@ public class PayCallbackServiceImpl implements PayCallbackService {
         }
     }
 
-    /**
+    // RocketMQ已禁用，改用OpenFeign远程调用
+    // 支付成功通知已通过Feign同步通知订单服务，如需通知其他服务请使用Feign客户端
+    /*
+    *//**
      * 发送支付成功事件到MQ
      *
      * @param pay 支付交易记录
-     */
+     *//*
     private void sendPaymentSuccessEvent(PayTransaction pay) {
         try {
             String destination = MqConstant.Order.TOPIC_EVENT + ":" + MqConstant.Order.Tag.PAID;
@@ -216,4 +223,5 @@ public class PayCallbackServiceImpl implements PayCallbackService {
             log.warn("支付成功事件发送到MQ失败 - orderNo={}, paySn={}", pay.getOrderNo(), pay.getPaySn(), e);
         }
     }
+    */
 }

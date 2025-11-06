@@ -32,7 +32,8 @@ import io.seata.spring.annotation.GlobalTransactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
+// RocketMQ已禁用，改用OpenFeign远程调用
+// import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,8 +54,9 @@ public class OrderServiceImpl implements OrderService {
     private final CartClient cartClient;
     private final StockClient stockClient;
     private final OrderIdGenerator orderIdGenerator;
-    private final RocketMQTemplate rocketMQTemplate;
-    private final OrderMqProperties orderMqProperties;
+    // RocketMQ已禁用，改用OpenFeign远程调用
+    // private final RocketMQTemplate rocketMQTemplate;
+    // private final OrderMqProperties orderMqProperties;
     private final ObjectMapper objectMapper;
     private final CacheManager cacheManager;
 
@@ -109,11 +111,11 @@ public class OrderServiceImpl implements OrderService {
             log.error("调用购物车服务删除条目异常，userId={}, orderNo={}", userId, orderNo, ex);
         }
 
-        // 9) 发送订单创建事件
-        sendOrderEvent(MqConstant.Order.Tag.CREATED, orderId, orderNo, userId);
+        // 9) 发送订单创建事件 - RocketMQ已禁用，改用OpenFeign远程调用
+        // sendOrderEvent(MqConstant.Order.Tag.CREATED, orderId, orderNo, userId);
 
-        // 9.1) 发送超时自动取消的延迟消息（默认30分钟，可通过配置项调整）
-        sendOrderTimeoutCancelDelay(orderId, orderNo, userId, orderMqProperties.getDelayCancelLevel());
+        // 9.1) 发送超时自动取消的延迟消息 - RocketMQ已禁用，可改用定时任务实现
+        // sendOrderTimeoutCancelDelay(orderId, orderNo, userId, orderMqProperties.getDelayCancelLevel());
 
         // 10) 返回创建结果
         return OrderCreateResponse.builder()
@@ -176,8 +178,8 @@ public class OrderServiceImpl implements OrderService {
 
         orderInfoMapper.updateById(order);
 
-        // 4) 发送支付成功事件
-        sendOrderEvent(MqConstant.Order.Tag.PAID, order.getId(), orderNo, userId);
+        // 4) 发送支付成功事件 - RocketMQ已禁用，改用OpenFeign远程调用
+        // sendOrderEvent(MqConstant.Order.Tag.PAID, order.getId(), orderNo, userId);
 
         return true;
     }
@@ -209,8 +211,8 @@ public class OrderServiceImpl implements OrderService {
 
         orderInfoMapper.updateById(order);
 
-        // 4) 发送取消事件
-        sendOrderEvent(MqConstant.Order.Tag.CANCELLED, order.getId(), orderNo, userId);
+        // 4) 发送取消事件 - RocketMQ已禁用，改用OpenFeign远程调用
+        // sendOrderEvent(MqConstant.Order.Tag.CANCELLED, order.getId(), orderNo, userId);
 
         return true;
     }
@@ -463,6 +465,9 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
+    // RocketMQ已禁用，改用OpenFeign远程调用
+    // 如需通知其他服务，请使用Feign客户端进行同步调用
+    /*
     //向MQ发送订单事件
     private void sendOrderEvent(String tag, long orderId, String orderNo, Long userId) {
         String destination = MqConstant.Order.TOPIC_EVENT + ":" + tag;
@@ -481,13 +486,7 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    /**
-     * 发送超时取消的延迟消息
-     * @param orderId 订单ID
-     * @param orderNo 订单号
-     * @param userId 用户ID
-     * @param delayLevel 延迟级别（RocketMQ内置级别：9约30分钟）
-     */
+ /*
     private void sendOrderTimeoutCancelDelay(long orderId, String orderNo, Long userId, int delayLevel) {
         String destination = MqConstant.Order.TOPIC_DELAY + ":" + MqConstant.Order.Tag.TIMEOUT_CANCELLED;
         OrderEventMessage payload = OrderEventMessage.builder()
@@ -509,6 +508,7 @@ public class OrderServiceImpl implements OrderService {
             log.warn("延迟取消消息发送失败，orderNo={}, delayLevel={}", orderNo, delayLevel, e);
         }
     }
+    */
 
     //查询订单
     private OrderInfo loadOrderOrThrow(Long userId, String orderNo) {

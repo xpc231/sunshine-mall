@@ -1,25 +1,25 @@
 package com.xpcjsu.sunshinemall.product.config;
 
-import lombok.extern.slf4j.Slf4j;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
-import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+// RocketMQ已禁用，改用OpenFeign远程调用
+// import lombok.extern.slf4j.Slf4j;
+// import org.apache.rocketmq.spring.core.RocketMQTemplate;
+// import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
+// import org.springframework.beans.factory.annotation.Value;
+// import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+// import org.springframework.context.annotation.Bean;
+// import org.springframework.context.annotation.Configuration;
 
 /**
  * RocketMQ配置类
  * 
  * 手动创建RocketMQTemplate Bean，解决RocketMQ 5.x自动配置问题。
  * 
- * 配置要求：
- * 1. application.yml中必须配置rocketmq.name-server
- * 2. 生产者需配置rocketmq.producer.group
+ * 注意：RocketMQ已禁用，改用OpenFeign远程调用
  * 
  * @author xpcjsu
  * @since 1.0.0
  */
+/*
 @Slf4j
 @Configuration
 public class RocketMQConfig {
@@ -34,11 +34,11 @@ public class RocketMQConfig {
         log.info("RocketMQ配置类加载完成");
     }
 
-    /**
+    *//**
      * 创建RocketMQTemplate Bean
      * 
      * @return RocketMQTemplate实例
-     */
+     *//*
     @Bean
     @ConditionalOnMissingBean
     public RocketMQTemplate rocketMQTemplate() {
@@ -50,10 +50,10 @@ public class RocketMQConfig {
         return template;
     }
 
-    /**
+    *//**
      * 创建默认生产者
      * 注意：不要在这里启动producer，RocketMQTemplate会自动启动
-     */
+     *//*
     private org.apache.rocketmq.client.producer.DefaultMQProducer createDefaultProducer() {
         org.apache.rocketmq.client.producer.DefaultMQProducer producer = 
             new org.apache.rocketmq.client.producer.DefaultMQProducer(producerGroup);
@@ -65,3 +65,4 @@ public class RocketMQConfig {
         return producer;
     }
 }
+*/

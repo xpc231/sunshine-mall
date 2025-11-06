@@ -31,7 +31,8 @@ import com.xpcjsu.sunshinemall.framework.common.mq.MqConstant;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
+// RocketMQ已禁用，改用OpenFeign远程调用
+// import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,7 +54,8 @@ public class PayServiceImpl implements PayService {
 
     private final AlipayChannelService alipayChannelService;
     private final WechatChannelService wechatChannelService;
-    private final RocketMQTemplate rocketMQTemplate;
+    // RocketMQ已禁用，改用OpenFeign远程调用
+    // private final RocketMQTemplate rocketMQTemplate;
 
     /**
      * 创建支付订单，并根据支付类型调用对应渠道的预下单接口生成支付链接。
@@ -217,8 +219,9 @@ public class PayServiceImpl implements PayService {
             log.error("调用订单服务异常 - orderNo: {}", pay.getOrderNo(), ex);
         }
 
-        // 4) 发送支付成功事件到MQ（异步通知其他服务）
-        sendPaymentSuccessEvent(pay);
+        // 4) 发送支付成功事件到MQ - RocketMQ已禁用，改用OpenFeign远程调用
+        // 支付成功通知已通过Feign同步通知订单服务，如需通知其他服务请使用Feign客户端
+        // sendPaymentSuccessEvent(pay);
 
         return true;
     }
@@ -322,11 +325,14 @@ public class PayServiceImpl implements PayService {
                 .build();
     }
 
-    /**
+    // RocketMQ已禁用，改用OpenFeign远程调用
+    // 支付成功通知已通过Feign同步通知订单服务，如需通知其他服务请使用Feign客户端
+    /*
+    *//**
      * 发送支付成功事件到MQ
      *
      * @param pay 支付交易记录
-     */
+     *//*
     private void sendPaymentSuccessEvent(PayTransaction pay) {
         try {
             String destination = MqConstant.Order.TOPIC_EVENT + ":" + MqConstant.Order.Tag.PAID;
@@ -347,4 +353,5 @@ public class PayServiceImpl implements PayService {
             log.warn("支付成功事件发送到MQ失败 - orderNo={}, paySn={}", pay.getOrderNo(), pay.getPaySn(), e);
         }
     }
+    */
 }

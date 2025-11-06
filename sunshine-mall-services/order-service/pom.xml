@@ -15,13 +15,20 @@
     <description>订单服务 - 订单管理、购物车、状态机</description>
 
     <dependencies>
+        <!-- 引入抽取后的通用 Feign 客户端 -->
+        <dependency>
+            <groupId>com.xpcjsu</groupId>
+            <artifactId>sunshine-mall-framework-common</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
         <!-- 框架层依赖 -->
         <dependency>
             <groupId>com.xpcjsu</groupId>
             <artifactId>sunshine-mall-framework-convention</artifactId>
             <version>${project.version}</version>
         </dependency>
-        
+
         <dependency>
             <groupId>com.xpcjsu</groupId>
             <artifactId>sunshine-mall-framework-database</artifactId>
@@ -66,12 +73,7 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- 引入抽取后的通用 Feign 客户端 -->
-        <dependency>
-            <groupId>com.xpcjsu</groupId>
-            <artifactId>sunshine-mall-framework-common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
+
     </dependencies>
 
     <build>

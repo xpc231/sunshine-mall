@@ -1,17 +1,22 @@
 package com.xpcjsu.sunshinemall.order.config;
 
 import lombok.extern.slf4j.Slf4j;
-import org.apache.rocketmq.spring.core.RocketMQTemplate;
-import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+// RocketMQ已禁用，改用OpenFeign远程调用
+// import org.apache.rocketmq.spring.core.RocketMQTemplate;
+// import org.apache.rocketmq.spring.support.RocketMQMessageConverter;
+// import org.springframework.beans.factory.annotation.Autowired;
+// import org.springframework.beans.factory.annotation.Value;
+// import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+// import org.springframework.context.annotation.Bean;
+// import org.springframework.context.annotation.Configuration;
 
 /**
  * RocketMQ配置（order-service）
  * 手动创建RocketMQTemplate，适配RocketMQ 5.x自动配置差异。
+ * 
+ * 注意：RocketMQ已禁用，改用OpenFeign远程调用
  */
+/*
 @Slf4j
 @Configuration
 public class RocketMQConfig {
@@ -22,9 +27,9 @@ public class RocketMQConfig {
     @Value("${rocketmq.producer.group}")
     private String producerGroup;
 
-    /**
+    *//**
      * 创建RocketMQTemplate Bean
-     */
+     *//*
     @Bean
     @ConditionalOnMissingBean
     public RocketMQTemplate rocketMQTemplate() {
@@ -35,9 +40,9 @@ public class RocketMQConfig {
         return template;
     }
 
-    /**
+    *//**
      * 创建默认生产者，不要主动启动，交由RocketMQTemplate管理
-     */
+     *//*
     private org.apache.rocketmq.client.producer.DefaultMQProducer createDefaultProducer() {
         org.apache.rocketmq.client.producer.DefaultMQProducer producer =
                 new org.apache.rocketmq.client.producer.DefaultMQProducer(producerGroup);
@@ -48,3 +53,4 @@ public class RocketMQConfig {
         return producer;
     }
 }
+*/
