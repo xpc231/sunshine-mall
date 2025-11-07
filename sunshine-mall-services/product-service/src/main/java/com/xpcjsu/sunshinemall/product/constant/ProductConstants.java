@@ -123,6 +123,39 @@ public class ProductConstants {
         
         /** 秒杀商品分页查询缓存过期时间（秒） */
         public static final long SECKILL_PRODUCT_PAGE_CACHE_EXPIRE = 300L; // 5分钟
+        
+        /** 秒杀商品详情锁键前缀 */
+        public static final String SECKILL_PRODUCT_LOCK_DETAIL_PREFIX = "seckill:product:lock:detail:";
+        
+        /** 秒杀商品SKU锁键前缀 */
+        public static final String SECKILL_PRODUCT_LOCK_SKU_PREFIX = "seckill:product:lock:sku:";
+        
+        /** 秒杀库存扣减锁键前缀 */
+        public static final String SECKILL_STOCK_LOCK_DEDUCT_PREFIX = "seckill:stock:deduct:";
+        
+        /** 秒杀库存回滚锁键前缀 */
+        public static final String SECKILL_STOCK_LOCK_ROLLBACK_PREFIX = "seckill:stock:rollback:";
+        
+        /** 互斥锁键前缀（用于缓存击穿防护） */
+        public static final String MUTEX_LOCK_PREFIX = "mutex:cache:";
+        
+        /** 互斥锁过期时间（秒） */
+        public static final long MUTEX_LOCK_EXPIRE_TIME = 10L;
+        
+        /** 秒杀缓存刷新线程名称 */
+        public static final String SECKILL_CACHE_REFRESH_THREAD_NAME = "seckill-cache-refresh";
+        
+        /** 分布式锁默认过期时间（秒） */
+        public static final long DISTRIBUTED_LOCK_DEFAULT_EXPIRE_TIME = 30L;
+        
+        /** 互斥锁值（用于SETNX） */
+        public static final String MUTEX_LOCK_VALUE = "1";
+        
+        /** 互斥锁等待重试时间（毫秒） */
+        public static final long MUTEX_LOCK_RETRY_WAIT_TIME_MS = 50L;
+        
+        /** 空值缓存默认过期时间（秒） */
+        public static final long NULL_VALUE_CACHE_EXPIRE_TIME = 300L; // 5分钟
     }
 
     /**
