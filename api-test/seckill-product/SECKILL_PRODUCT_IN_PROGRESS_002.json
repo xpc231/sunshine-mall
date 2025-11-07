@@ -1,0 +1,28 @@
+{
+  "caseId": "SECKILL_PRODUCT_IN_PROGRESS_002",
+  "title": "查询进行中的秒杀商品-测试数据2",
+  "api": {
+    "method": "GET",
+    "path": "/api/seckill/product/in-progress",
+    "headers": {}
+  },
+  "request": {},
+  "expected": {
+    "httpStatus": 200,
+    "body": {
+      "code": "0",
+      "data": {
+        "length": ">=2",
+        "1": {
+          "id": 100002,
+          "status": 1
+        }
+      }
+    }
+  },
+  "notes": [
+    "查询所有进行中的秒杀商品",
+    "返回秒杀商品列表，至少包含 id=100001 和 id=100002"
+  ]
+}
+

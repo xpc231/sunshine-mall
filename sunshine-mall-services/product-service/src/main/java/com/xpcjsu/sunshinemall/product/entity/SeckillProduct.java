@@ -95,6 +95,11 @@ public class SeckillProduct {
     private String updateBy;
 
     /**
+     * 版本号（乐观锁，用于防超卖）
+     */
+    private Integer version;
+
+    /**
      * 删除标识（0-未删除，1-已删除）
      */
     @TableLogic

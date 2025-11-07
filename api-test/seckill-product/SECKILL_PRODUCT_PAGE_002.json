@@ -1,0 +1,27 @@
+{
+  "caseId": "SECKILL_PRODUCT_PAGE_002",
+  "title": "分页查询秒杀商品-测试数据2",
+  "api": {
+    "method": "GET",
+    "path": "/api/seckill/product/page?pageNum=1&pageSize=10&status=1",
+    "headers": {}
+  },
+  "request": {},
+  "expected": {
+    "httpStatus": 200,
+    "body": {
+      "code": "0",
+      "data": {
+        "records": "notNull",
+        "total": "notNull",
+        "size": 10,
+        "current": 1
+      }
+    }
+  },
+  "notes": [
+    "查询进行中的秒杀商品（status=1）",
+    "返回分页结果"
+  ]
+}
+

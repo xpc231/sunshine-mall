@@ -1,0 +1,35 @@
+{
+  "caseId": "SECKILL_PRODUCT_CREATE_001",
+  "title": "创建秒杀商品-测试数据1",
+  "api": {
+    "method": "POST",
+    "path": "/api/seckill/product",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  },
+  "request": {
+    "productId": 1001,
+    "skuId": 10001,
+    "seckillPrice": 7999.00,
+    "seckillStock": 100,
+    "originalPrice": 9999.00,
+    "startTime": "2025-01-15T10:00:00",
+    "endTime": "2025-01-15T22:00:00",
+    "limitQuantity": 2,
+    "sortOrder": 1
+  },
+  "expected": {
+    "httpStatus": 200,
+    "body": {
+      "code": "0",
+      "message": "创建成功",
+      "data": "notNull"
+    }
+  },
+  "notes": [
+    "需要确保 productId=1001 和 skuId=10001 存在",
+    "创建成功后会返回秒杀商品ID"
+  ]
+}
+

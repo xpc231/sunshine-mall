@@ -1,0 +1,22 @@
+{
+  "caseId": "SECKILL_PRODUCT_WARMUP_STOCK_002",
+  "title": "预热秒杀库存到Redis-测试数据2",
+  "api": {
+    "method": "POST",
+    "path": "/api/seckill/product/100002/warmup-stock",
+    "headers": {}
+  },
+  "request": {},
+  "expected": {
+    "httpStatus": 200,
+    "body": {
+      "code": "0",
+      "message": "预热成功"
+    }
+  },
+  "notes": [
+    "需要确保 id=100002 的秒杀商品存在",
+    "将数据库库存加载到Redis，用于秒杀活动开始前预热"
+  ]
+}
+

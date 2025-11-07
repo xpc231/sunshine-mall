@@ -11,5 +11,5 @@ spring:
           - dataId: shared-redis.yaml
           - dataId: shared-rocketmq.yaml
           - dataId: shared-sentinel.yaml
-          - dataId: shared-seata.yaml
+#          - dataId: shared-seata.yaml
 

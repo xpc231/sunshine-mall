@@ -1,0 +1,23 @@
+{
+  "caseId": "SECKILL_PRODUCT_DEDUCT_STOCK_001",
+  "title": "扣减秒杀库存-测试数据1",
+  "api": {
+    "method": "POST",
+    "path": "/api/seckill/product/100001/deduct-stock?quantity=1",
+    "headers": {}
+  },
+  "request": {},
+  "expected": {
+    "httpStatus": 200,
+    "body": {
+      "code": "0",
+      "message": "扣减成功"
+    }
+  },
+  "notes": [
+    "需要确保 id=100001 的秒杀商品存在且有库存",
+    "扣减1件库存",
+    "使用分布式锁和乐观锁保证并发安全"
+  ]
+}
+

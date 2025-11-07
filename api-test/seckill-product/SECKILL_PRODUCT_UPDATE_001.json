@@ -1,0 +1,34 @@
+{
+  "caseId": "SECKILL_PRODUCT_UPDATE_001",
+  "title": "更新秒杀商品-测试数据1",
+  "api": {
+    "method": "PUT",
+    "path": "/api/seckill/product/100001",
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  },
+  "request": {
+    "productId": 1001,
+    "skuId": 10001,
+    "seckillPrice": 7899.00,
+    "seckillStock": 150,
+    "originalPrice": 9999.00,
+    "startTime": "2025-01-15T10:00:00",
+    "endTime": "2025-01-15T22:00:00",
+    "limitQuantity": 3,
+    "sortOrder": 1
+  },
+  "expected": {
+    "httpStatus": 200,
+    "body": {
+      "code": "0",
+      "message": "更新成功"
+    }
+  },
+  "notes": [
+    "需要确保 id=100001 的秒杀商品存在",
+    "更新秒杀价格和库存"
+  ]
+}
+

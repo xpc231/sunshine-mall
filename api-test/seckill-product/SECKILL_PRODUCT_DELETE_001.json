@@ -1,0 +1,22 @@
+{
+  "caseId": "SECKILL_PRODUCT_DELETE_001",
+  "title": "删除秒杀商品-测试数据1",
+  "api": {
+    "method": "DELETE",
+    "path": "/api/seckill/product/100003",
+    "headers": {}
+  },
+  "request": {},
+  "expected": {
+    "httpStatus": 200,
+    "body": {
+      "code": "0",
+      "message": "删除成功"
+    }
+  },
+  "notes": [
+    "需要确保 id=100003 的秒杀商品存在",
+    "删除操作是逻辑删除，is_deleted=1"
+  ]
+}
+

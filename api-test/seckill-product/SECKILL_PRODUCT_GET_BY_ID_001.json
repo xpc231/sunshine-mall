@@ -1,0 +1,30 @@
+{
+  "caseId": "SECKILL_PRODUCT_GET_BY_ID_001",
+  "title": "根据ID获取秒杀商品-测试数据1",
+  "api": {
+    "method": "GET",
+    "path": "/api/seckill/product/100001",
+    "headers": {}
+  },
+  "request": {},
+  "expected": {
+    "httpStatus": 200,
+    "body": {
+      "code": "0",
+      "data": {
+        "id": 100001,
+        "productId": 1001,
+        "skuId": 10001,
+        "seckillPrice": 7999.00,
+        "seckillStock": "notNull",
+        "originalPrice": 9999.00,
+        "status": 1
+      }
+    }
+  },
+  "notes": [
+    "需要确保 id=100001 的秒杀商品存在",
+    "返回秒杀商品详情"
+  ]
+}
+

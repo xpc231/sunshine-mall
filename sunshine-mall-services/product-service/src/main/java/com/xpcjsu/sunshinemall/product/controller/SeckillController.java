@@ -117,6 +117,11 @@ public class SeckillController {
 
     /**
      * 回滚秒杀库存
+     * <p>
+     * 说明：
+     * 1. 订单创建失败时：自动调用（在OrderService中）
+     * 2. 订单取消时：自动调用（在OrderService中）
+     * 3. 此接口主要用于：管理员手动补偿、异常情况修复等场景
      */
     @PostMapping("/product/{id}/rollback-stock")
     public Result<Void> rollbackSeckillStock(@PathVariable Long id,

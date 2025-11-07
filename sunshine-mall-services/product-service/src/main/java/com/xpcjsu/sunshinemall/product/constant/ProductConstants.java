@@ -102,6 +102,27 @@ public class ProductConstants {
 
         /** 秒杀库存缓存前缀 */
         public static final String SECKILL_STOCK_KEY_PREFIX = "seckill:stock:";
+        
+        /** 秒杀商品详情缓存前缀 */
+        public static final String SECKILL_PRODUCT_DETAIL_PREFIX = "seckill:product:detail:";
+        
+        /** 秒杀商品SKU缓存前缀 */
+        public static final String SECKILL_PRODUCT_SKU_PREFIX = "seckill:product:sku:";
+        
+        /** 进行中的秒杀商品列表缓存键 */
+        public static final String SECKILL_PRODUCT_IN_PROGRESS_KEY = "seckill:product:in-progress";
+        
+        /** 秒杀商品分页查询缓存前缀 */
+        public static final String SECKILL_PRODUCT_PAGE_PREFIX = "seckill:product:page:";
+        
+        /** 秒杀商品详情缓存过期时间（秒） */
+        public static final long SECKILL_PRODUCT_CACHE_EXPIRE = 1800L; // 30分钟
+        
+        /** 进行中的秒杀商品列表缓存过期时间（秒） */
+        public static final long SECKILL_PRODUCT_IN_PROGRESS_CACHE_EXPIRE = 300L; // 5分钟
+        
+        /** 秒杀商品分页查询缓存过期时间（秒） */
+        public static final long SECKILL_PRODUCT_PAGE_CACHE_EXPIRE = 300L; // 5分钟
     }
 
     /**
