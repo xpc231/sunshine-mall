@@ -25,5 +25,14 @@ public interface SeckillOrderMapper extends BaseMapper<SeckillOrder> {
     SeckillOrder selectByUserIdAndSeckillProductId(@Param("userId") Long userId,
                                                    @Param("seckillProductId") Long seckillProductId);
 
+    /**
+     * 根据订单ID查询秒杀订单记录
+     *
+     * @param orderId 订单ID
+     * @return 秒杀订单记录
+     */
+    @Select("SELECT * FROM seckill_order WHERE order_id = #{orderId} LIMIT 1")
+    SeckillOrder selectByOrderId(@Param("orderId") Long orderId);
+
 }
 

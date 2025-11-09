@@ -28,7 +28,7 @@ import com.xpcjsu.sunshinemall.order.mq.message.OrderEventMessage;
 import com.xpcjsu.sunshinemall.order.service.OrderService;
 // 移除未使用的状态机依赖，避免不必要的注入与代码膨胀
 import com.xpcjsu.sunshinemall.order.util.OrderIdGenerator;
-import io.seata.spring.annotation.GlobalTransactional;
+//import io.seata.spring.annotation.GlobalTransactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -60,10 +60,13 @@ public class OrderServiceImpl implements OrderService {
     private final ObjectMapper objectMapper;
     private final CacheManager cacheManager;
     private final com.xpcjsu.sunshinemall.order.handler.SeckillOrderHandler seckillOrderHandler;
+    private final com.xpcjsu.sunshinemall.order.service.SeckillOrderService seckillOrderService;
 
     @Override
     @Idempotent(key = "'order:create:' + #userId + ':' + #request.clientToken", prefix = "idempotent", expireTime = 120)
-    @GlobalTransactional//该注解会自动管理整个调用链路中的分布式事务
+    // 注意：@GlobalTransactional 已注释，因为当前使用本地事务
+    // 如需分布式事务，可启用 Seata 的 @GlobalTransactional 注解
+    @Transactional(rollbackFor = Exception.class)
     public OrderCreateResponse createOrder(Long userId, OrderCreateRequest request) {
         // 1) 参数校验
         validateCreateOrderRequest(userId, request);
@@ -213,9 +216,14 @@ public class OrderServiceImpl implements OrderService {
         OrderInfo order = loadOrderOrThrow(userId, orderNo);
         ensureCancellable(order);
 
-        // 2) 释放库存
+        // 2) 释放库存（普通订单释放预占库存，秒杀订单回滚库存）
         List<OrderItem> items = listOrderItems(order.getId());
         unlockOrderStockForCancel(order, items, "CANCEL");
+        
+        // 2.1) 如果是秒杀订单，回滚秒杀库存并更新秒杀订单记录状态
+        if (order.getOrderType() != null && order.getOrderType() == 1) {
+            handleSeckillOrderCancel(order);
+        }
 
         // 3) 更新订单状态
         order.setStatus(OrderStatus.CANCELLED.getCode());
@@ -307,7 +315,16 @@ public class OrderServiceImpl implements OrderService {
         return skuList;
     }
 
-    // 预占库存（普通订单）或扣减秒杀库存（秒杀订单）
+    /**
+     * 预占库存（普通订单）或扣减秒杀库存（秒杀订单）
+     *
+     * @param itemsReq 订单项列表
+     * @param orderId 订单ID
+     * @param orderNo 订单编号
+     * @param orderType 订单类型（0-普通订单，1-秒杀订单）
+     * @param seckillProductInfo 秒杀商品信息（秒杀订单时不为空）
+     * @return 已锁定/扣减的订单项列表
+     */
     private List<SkuQuantityRequest> preLockStock(List<SkuQuantityRequest> itemsReq,
                                                   long orderId, String orderNo,
                                                   Integer orderType,
@@ -326,38 +343,46 @@ public class OrderServiceImpl implements OrderService {
 
             // 普通订单：预占库存
             for (SkuQuantityRequest itemReq : itemsReq) {
-
                 var lockRes = stockClient.lockStock(itemReq.getSkuId(),
                         itemReq.getQuantity(), orderId, "CREATE:" + orderNo);
 
                 if (lockRes == null || lockRes.isFailure()) {
-
-                    for (SkuQuantityRequest locked : lockedItems) {
-
-                        try {
-                            stockClient.unlockStock(locked.getSkuId(),
-                                    locked.getQuantity(), orderId, "ROLLBACK:" + orderNo);
-
-                        } catch (Exception e) {
-                            log.warn("释放预占库存失败，skuId={}, qty={}, orderId={}",
-                                    locked.getSkuId(), locked.getQuantity(), orderId);
-                        }
-                    }
-
+                    // 回滚已预占的库存
+                    rollbackLockedStock(lockedItems, orderId, orderNo);
                     throw new BusinessException(BusinessErrorCode.PRODUCT_INSUFFICIENT_STOCK, "库存预占失败");
                 }
 
                 lockedItems.add(itemReq);
             }
 
-        } catch (RuntimeException e) {
+        } catch (BusinessException e) {
             throw e;
-
         } catch (Exception e) {
+            // 回滚已预占的库存
+            rollbackLockedStock(lockedItems, orderId, orderNo);
             throw new BusinessException(BusinessErrorCode.SYSTEM_BUSY, "库存服务异常", e);
         }
 
         return lockedItems;
+    }
+
+    /**
+     * 回滚已预占的库存
+     *
+     * @param lockedItems 已锁定的订单项列表
+     * @param orderId 订单ID
+     * @param orderNo 订单编号
+     */
+    private void rollbackLockedStock(List<SkuQuantityRequest> lockedItems, long orderId, String orderNo) {
+        for (SkuQuantityRequest locked : lockedItems) {
+            try {
+                stockClient.unlockStock(locked.getSkuId(),
+                        locked.getQuantity(), orderId, "ROLLBACK:" + orderNo);
+            } catch (Exception e) {
+                log.warn("释放预占库存失败，skuId={}, qty={}, orderId={}",
+                        locked.getSkuId(), locked.getQuantity(), orderId, e);
+            }
+        }
     }
 
     //统计各个sku的金额
@@ -603,19 +628,53 @@ public class OrderServiceImpl implements OrderService {
         }
     }
 
-    //取消订单释放库存
+    //取消订单释放库存（普通订单）
     private void unlockOrderStockForCancel(OrderInfo order, List<OrderItem> items, String tagPrefix) {
+        // 秒杀订单不释放普通库存（秒杀订单使用独立库存）
+        if (order.getOrderType() != null && order.getOrderType() == 1) {
+            return;
+        }
+        
         for (OrderItem item : items) {
-
             try {
                 stockClient.unlockStock(item.getSkuId(), item.getQuantity(), order.getId(),
                         tagPrefix + ":" + order.getOrderNo());
-
             } catch (Exception e) {
                 log.warn("取消订单释放库存失败，skuId={}, qty={}, orderId={}",
                         item.getSkuId(), item.getQuantity(), order.getId());
             }
+        }
+    }
 
+    /**
+     * 处理秒杀订单取消（回滚秒杀库存）
+     *
+     * @param order 订单信息
+     */
+    private void handleSeckillOrderCancel(OrderInfo order) {
+        try {
+            // 1. 查询秒杀订单记录
+            com.xpcjsu.sunshinemall.order.dto.entity.SeckillOrder seckillOrder =
+                    seckillOrderService.getSeckillOrderByOrderId(order.getId());
+            
+            if (seckillOrder == null) {
+                log.warn("取消秒杀订单时未找到秒杀订单记录 - orderId: {}", order.getId());
+                return;
+            }
+
+            // 2. 回滚秒杀库存
+            java.util.Map<String, Object> seckillProductInfo = new java.util.HashMap<>();
+            seckillProductInfo.put("seckillProductId", seckillOrder.getSeckillProductId());
+            seckillOrderHandler.rollbackSeckillStock(seckillProductInfo, seckillOrder.getQuantity());
+
+            // 3. 更新秒杀订单记录状态为已取消
+            seckillOrderService.updateSeckillOrderStatus(seckillOrder.getId(), 2); // 2-已取消
+
+            log.info("取消秒杀订单成功 - orderId: {}, seckillProductId: {}, quantity: {}",
+                    order.getId(), seckillOrder.getSeckillProductId(), seckillOrder.getQuantity());
+        } catch (Exception e) {
+            log.error("取消秒杀订单异常 - orderId: {}", order.getId(), e);
+            // 不抛出异常，避免影响订单取消主流程
         }
     }
 

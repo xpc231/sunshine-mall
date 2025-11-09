@@ -61,6 +61,9 @@ public class SeckillController {
     @GetMapping("/product/{id}")
     public Result<SeckillProductDTO> getSeckillProductById(@PathVariable Long id) {
         SeckillProductDTO seckillProduct = seckillProductService.getSeckillProductById(id);
+        if (seckillProduct == null) {
+            return Result.failure("SECKILL_NOT_FOUND", "秒杀商品不存在");
+        }
         return Result.success(seckillProduct);
     }
 
@@ -70,6 +73,9 @@ public class SeckillController {
     @GetMapping("/product/sku/{skuId}")
     public Result<SeckillProductDTO> getSeckillProductBySkuId(@PathVariable Long skuId) {
         SeckillProductDTO seckillProduct = seckillProductService.getSeckillProductBySkuId(skuId);
+        if (seckillProduct == null) {
+            return Result.failure("SECKILL_NOT_FOUND", "秒杀商品不存在");
+        }
         return Result.success(seckillProduct);
     }
 

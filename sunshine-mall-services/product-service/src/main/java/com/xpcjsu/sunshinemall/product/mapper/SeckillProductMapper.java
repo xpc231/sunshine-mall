@@ -57,5 +57,25 @@ public interface SeckillProductMapper extends BaseMapper<SeckillProduct> {
                             @Param("quantity") Integer quantity, 
                             @Param("version") Integer version);
 
+    /**
+     * 查询所有秒杀商品ID
+     * <p>
+     * 用于初始化布隆过滤器
+     *
+     * @return 秒杀商品ID列表
+     */
+    @Select("SELECT id FROM seckill_product WHERE is_deleted = 0")
+    List<Long> selectAllSeckillProductIds();
+
+    /**
+     * 查询所有SKU ID（用于秒杀商品的SKU）
+     * <p>
+     * 用于初始化布隆过滤器
+     *
+     * @return SKU ID列表
+     */
+    @Select("SELECT DISTINCT sku_id FROM seckill_product WHERE is_deleted = 0 AND sku_id IS NOT NULL")
+    List<Long> selectAllSkuIds();
+
 }
 

@@ -45,5 +45,13 @@ public interface SeckillOrderService {
      */
     boolean updateSeckillOrderStatus(Long seckillOrderId, Integer status);
 
+    /**
+     * 根据订单ID查询秒杀订单记录
+     *
+     * @param orderId 订单ID
+     * @return 秒杀订单记录
+     */
+    SeckillOrder getSeckillOrderByOrderId(Long orderId);
+
 }
 

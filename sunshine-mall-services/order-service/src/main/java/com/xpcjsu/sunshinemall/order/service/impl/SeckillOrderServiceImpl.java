@@ -125,6 +125,14 @@ public class SeckillOrderServiceImpl implements SeckillOrderService {
         return updated > 0;
     }
 
+    @Override
+    public SeckillOrder getSeckillOrderByOrderId(Long orderId) {
+        if (orderId == null) {
+            throw new ValidationException("ORDER_ID_REQUIRED", "订单ID不能为空");
+        }
+        return seckillOrderMapper.selectByOrderId(orderId);
+    }
+
     /**
      * 验证秒杀订单参数
      */

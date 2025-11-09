@@ -20,6 +20,9 @@ import com.xpcjsu.sunshinemall.product.helper.SeckillProductStockHelper;
 import com.xpcjsu.sunshinemall.product.helper.SeckillProductConverter;
 import com.xpcjsu.sunshinemall.product.helper.SeckillProductValidator;
 import com.xpcjsu.sunshinemall.product.util.CacheExpireTimeManager;
+import com.xpcjsu.sunshinemall.product.util.SeckillProductParamValidator;
+import com.xpcjsu.sunshinemall.product.util.SeckillProductBloomFilter;
+import com.xpcjsu.sunshinemall.framework.base.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -54,6 +57,7 @@ public class SeckillProductServiceImpl implements SeckillProductService {
     private final SeckillProductConverter converter;
     private final SeckillProductValidator validator;
     private final CacheExpireTimeManager expireTimeManager;
+    private final SeckillProductBloomFilter bloomFilter;
 
 
     @Override
@@ -116,6 +120,10 @@ public class SeckillProductServiceImpl implements SeckillProductService {
 
         // 保存到数据库
         seckillProductMapper.insert(seckillProduct);
+
+        // 添加到布隆过滤器（防止缓存穿透）
+        bloomFilter.addSeckillProductId(seckillId);
+        bloomFilter.addSkuId(seckillProductDTO.getSkuId());
 
         // 删除相关缓存（旁路策略：先更新数据库，再删除缓存）
         cacheHelper.deleteSeckillProductCache(seckillId, seckillProductDTO.getSkuId());
@@ -196,11 +204,16 @@ public class SeckillProductServiceImpl implements SeckillProductService {
 
     @Override
     public SeckillProductDTO getSeckillProductById(Long id) {
-        if (id == null) {
-            throw new ValidationException("SECKILL_ID_REQUIRED", "秒杀商品ID不能为空");
+        // 第一道防线：参数校验（防止恶意构造的无效ID）
+        SeckillProductParamValidator.validateSeckillProductId(id);
+
+        // 第二道防线：布隆过滤器拦截（如果不存在则直接返回）
+        if (!bloomFilter.mightExist(id)) {
+            log.warn("布隆过滤器拦截 - 秒杀商品ID不存在: {}", id);
+            throw new BusinessException("SECKILL_NOT_FOUND", "秒杀商品不存在");
         }
 
-        // 使用分布式锁 + 双重检查方案防止缓存击穿
+        // 第三道防线：使用分布式锁 + 双重检查方案防止缓存击穿
         String cacheKey = cacheHelper.getSeckillProductDetailKey(id);
         String lockKey = ProductConstants.Cache.SECKILL_PRODUCT_LOCK_DETAIL_PREFIX + id;
 
@@ -223,11 +236,16 @@ public class SeckillProductServiceImpl implements SeckillProductService {
 
     @Override
     public SeckillProductDTO getSeckillProductBySkuId(Long skuId) {
-        if (skuId == null) {
-            throw new ValidationException("SKU_ID_REQUIRED", "SKU ID不能为空");
+        // 第一道防线：参数校验（防止恶意构造的无效SKU ID）
+        SeckillProductParamValidator.validateSkuId(skuId);
+
+        // 第二道防线：布隆过滤器拦截（如果不存在则直接返回）
+        if (!bloomFilter.skuMightExist(skuId)) {
+            log.warn("布隆过滤器拦截 - SKU ID不存在: {}", skuId);
+            throw new BusinessException("SECKILL_NOT_FOUND", "秒杀商品不存在");
         }
 
-        // 使用分布式锁 + 双重检查方案防止缓存击穿
+        // 第三道防线：使用分布式锁 + 双重检查方案防止缓存击穿
         String cacheKey = cacheHelper.getSeckillProductSkuKey(skuId);
         String lockKey = ProductConstants.Cache.SECKILL_PRODUCT_LOCK_SKU_PREFIX + skuId;
 
@@ -254,13 +272,8 @@ public class SeckillProductServiceImpl implements SeckillProductService {
 
     @Override
     public Page<SeckillProductDTO> getSeckillProductsByPage(int pageNum, int pageSize, Integer status) {
-        // 验证并修正分页参数
-        if (pageNum < 1) {
-            pageNum = 1;
-        }
-        if (pageSize < 1 || pageSize > 100) {
-            pageSize = 10; // 默认每页10条，最大100条
-        }
+        // 第一道防线：参数校验
+        SeckillProductParamValidator.validatePageParams(pageNum, pageSize);
 
         // 1. 先查缓存
         String cacheKey = cacheHelper.getSeckillProductPageKey(pageNum, pageSize, status);
@@ -268,12 +281,17 @@ public class SeckillProductServiceImpl implements SeckillProductService {
         if (cachedObj != null) {
             log.debug("从缓存获取秒杀商品分页列表 - pageNum: {}, pageSize: {}, status: {}", pageNum, pageSize, status);
             // 处理反序列化问题：Redis反序列化时，Page中的records可能是LinkedHashMap
-            Page<SeckillProductDTO> cachedPage = converter.convertCachedPage(cachedObj);
-            if (cachedPage != null) {
-                return cachedPage;
+            try {
+                Page<SeckillProductDTO> cachedPage = converter.convertCachedPage(cachedObj);
+                if (cachedPage != null) {
+                    return cachedPage;
+                }
+                // 如果转换失败，删除缓存，重新查询
+                cacheManager.delete(cacheKey);
+            } catch (Exception e) {
+                log.warn("缓存转换失败，删除缓存key: {}", cacheKey, e);
+                cacheManager.delete(cacheKey);
             }
-            // 如果转换失败，删除缓存，重新查询
-            cacheManager.delete(cacheKey);
         }
 
         // 2. 缓存未命中，查询数据库

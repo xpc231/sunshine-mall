@@ -1,6 +1,7 @@
 package com.xpcjsu.sunshinemall.product.helper;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xpcjsu.sunshinemall.product.dto.SeckillProductDTO;
 import com.xpcjsu.sunshinemall.product.entity.SeckillProduct;
@@ -9,7 +10,6 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * 秒杀商品转换辅助类
@@ -49,8 +49,7 @@ public class SeckillProductConverter {
     /**
      * 转换缓存的DTO对象（处理反序列化问题）
      * <p>
-     * Redis反序列化时，DTO对象可能是LinkedHashMap而不是SeckillProductDTO
-     * 需要手动转换为SeckillProductDTO
+     * 使用hutool的JSONUtil.toBean()自动处理LinkedHashMap、Map等类型转换
      *
      * @param cachedObj 从缓存获取的对象
      * @return 转换后的DTO对象，如果转换失败返回null
@@ -69,17 +68,12 @@ public class SeckillProductConverter {
             }
             
             if (cachedObj instanceof SeckillProductDTO) {
-                // 已经是SeckillProductDTO类型，直接返回
+                // 已经是目标类型，直接返回
                 return (SeckillProductDTO) cachedObj;
-            } else if (cachedObj instanceof java.util.LinkedHashMap) {
-                // 是LinkedHashMap，需要转换为SeckillProductDTO
-                SeckillProductDTO dto = new SeckillProductDTO();
-                BeanUtil.copyProperties(cachedObj, dto);
-                return dto;
-            } else {
-                log.warn("缓存对象类型不支持 - type: {}, value: {}", cachedObj.getClass().getName(), cachedObj);
-                return null;
             }
+            
+            // 使用hutool的JSONUtil自动转换（支持LinkedHashMap、Map、JSON字符串等）
+            return JSONUtil.toBean(JSONUtil.toJsonStr(cachedObj), SeckillProductDTO.class);
         } catch (Exception e) {
             log.error("转换缓存DTO对象失败 - type: {}, error: {}", 
                     cachedObj != null ? cachedObj.getClass().getName() : "null", e.getMessage(), e);
@@ -90,8 +84,7 @@ public class SeckillProductConverter {
     /**
      * 转换缓存的List对象（处理反序列化问题）
      * <p>
-     * Redis反序列化时，List中的元素可能是LinkedHashMap而不是SeckillProductDTO
-     * 需要手动转换为SeckillProductDTO
+     * 使用hutool的JSONUtil自动处理List中的LinkedHashMap转换
      *
      * @param cachedObj 从缓存获取的对象
      * @return 转换后的List对象，如果转换失败返回null
@@ -99,6 +92,10 @@ public class SeckillProductConverter {
     @SuppressWarnings("unchecked")
     public List<SeckillProductDTO> convertCachedList(Object cachedObj) {
         try {
+            if (cachedObj == null) {
+                return new ArrayList<>();
+            }
+            
             if (!(cachedObj instanceof List)) {
                 log.warn("缓存对象不是List类型 - type: {}", cachedObj.getClass().getName());
                 return null;
@@ -111,32 +108,13 @@ public class SeckillProductConverter {
 
             // 检查第一个元素的类型
             Object firstElement = cachedList.get(0);
-            List<SeckillProductDTO> dtoList;
-
             if (firstElement instanceof SeckillProductDTO) {
-                // 已经是SeckillProductDTO类型，直接转换
-                dtoList = (List<SeckillProductDTO>) cachedList;
-            } else if (firstElement instanceof java.util.LinkedHashMap) {
-                // 是LinkedHashMap，需要转换为SeckillProductDTO
-                dtoList = cachedList.stream()
-                        .map(element -> {
-                            if (element instanceof java.util.LinkedHashMap) {
-                                SeckillProductDTO dto = new SeckillProductDTO();
-                                BeanUtil.copyProperties(element, dto);
-                                return dto;
-                            } else {
-                                log.warn("缓存元素类型异常 - type: {}", element.getClass().getName());
-                                return null;
-                            }
-                        })
-                        .filter(java.util.Objects::nonNull)
-                        .collect(Collectors.toList());
-            } else {
-                log.warn("缓存元素类型不支持 - type: {}", firstElement.getClass().getName());
-                return null;
+                // 已经是目标类型，直接转换
+                return (List<SeckillProductDTO>) cachedList;
             }
 
-            return dtoList;
+            // 使用hutool的JSONUtil自动转换（支持List中的LinkedHashMap、Map等）
+            return JSONUtil.toList(JSONUtil.toJsonStr(cachedObj), SeckillProductDTO.class);
         } catch (Exception e) {
             log.error("转换缓存List对象失败", e);
             return null;
@@ -146,8 +124,7 @@ public class SeckillProductConverter {
     /**
      * 转换缓存的Page对象（处理反序列化问题）
      * <p>
-     * Redis反序列化时，Page中的records列表中的元素可能是LinkedHashMap而不是SeckillProductDTO
-     * 需要手动转换为SeckillProductDTO
+     * 使用hutool的JSONUtil自动处理Page中records的LinkedHashMap转换
      *
      * @param cachedObj 从缓存获取的对象
      * @return 转换后的Page对象，如果转换失败返回null
@@ -155,6 +132,10 @@ public class SeckillProductConverter {
     @SuppressWarnings("unchecked")
     public Page<SeckillProductDTO> convertCachedPage(Object cachedObj) {
         try {
+            if (cachedObj == null) {
+                return null;
+            }
+            
             if (!(cachedObj instanceof Page)) {
                 log.warn("缓存对象不是Page类型 - type: {}", cachedObj.getClass().getName());
                 return null;
@@ -162,9 +143,13 @@ public class SeckillProductConverter {
 
             Page<?> cachedPage = (Page<?>) cachedObj;
             List<?> records = cachedPage.getRecords();
+            
+            // 重新构建Page对象
+            Page<SeckillProductDTO> dtoPage = new Page<>(cachedPage.getCurrent(),
+                    cachedPage.getSize(), cachedPage.getTotal());
+            
             if (records == null || records.isEmpty()) {
                 // 空列表，直接返回
-                Page<SeckillProductDTO> dtoPage = new Page<>(cachedPage.getCurrent(), cachedPage.getSize(), cachedPage.getTotal());
                 dtoPage.setRecords(new ArrayList<>());
                 return dtoPage;
             }
@@ -174,30 +159,13 @@ public class SeckillProductConverter {
             List<SeckillProductDTO> dtoList;
 
             if (firstRecord instanceof SeckillProductDTO) {
-                // 已经是SeckillProductDTO类型，直接转换
+                // 已经是目标类型，直接转换
                 dtoList = (List<SeckillProductDTO>) records;
-            } else if (firstRecord instanceof java.util.LinkedHashMap) {
-                // 是LinkedHashMap，需要转换为SeckillProductDTO
-                dtoList = records.stream()
-                        .map(record -> {
-                            if (record instanceof java.util.LinkedHashMap) {
-                                SeckillProductDTO dto = new SeckillProductDTO();
-                                BeanUtil.copyProperties(record, dto);
-                                return dto;
-                            } else {
-                                log.warn("缓存记录类型异常 - type: {}", record.getClass().getName());
-                                return null;
-                            }
-                        })
-                        .filter(java.util.Objects::nonNull)
-                        .collect(Collectors.toList());
             } else {
-                log.warn("缓存记录类型不支持 - type: {}", firstRecord.getClass().getName());
-                return null;
+                // 使用hutool的JSONUtil自动转换（支持List中的LinkedHashMap、Map等）
+                dtoList = JSONUtil.toList(JSONUtil.toJsonStr(records), SeckillProductDTO.class);
             }
 
-            // 重新构建Page对象
-            Page<SeckillProductDTO> dtoPage = new Page<>(cachedPage.getCurrent(), cachedPage.getSize(), cachedPage.getTotal());
             dtoPage.setRecords(dtoList);
             return dtoPage;
         } catch (Exception e) {

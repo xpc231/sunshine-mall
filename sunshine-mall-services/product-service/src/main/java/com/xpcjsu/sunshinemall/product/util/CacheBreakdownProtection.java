@@ -15,7 +15,7 @@ import java.util.function.Supplier;
  * <p>
  * 提供三种防护方案：
  * 1. 分布式锁 + 双重检查（推荐）：适用于热点数据，防止并发查询数据库
- * 2. 互斥锁（Mutex Lock）：轻量级方案，使用Redis SETNX实现
+ * 2. 互斥锁（Mutex Lock）：轻量级方案，使用Redis SETNX实现（未使用）
  * 3. 永不过期 + 异步刷新：适用于极热点数据，设置永不过期，后台异步刷新
  *
  * @author xpcjsu
@@ -57,7 +57,8 @@ public class CacheBreakdownProtection {
         }
 
         // 缓存未命中，使用分布式锁保护
-        return distributedLock.executeWithLock(lockKey, ProductConstants.Cache.DISTRIBUTED_LOCK_DEFAULT_EXPIRE_TIME, () -> {
+        return distributedLock.executeWithLock(lockKey,
+                ProductConstants.Cache.DISTRIBUTED_LOCK_DEFAULT_EXPIRE_TIME, () -> {
             //等待锁期间，可能已经有其他线程完成了数据库查询并更新了缓存
             //双重检查：获取锁后再次检查缓存
             T cached2 = tryGetFromCache(cacheKey, converter, "双重检查");
@@ -103,7 +104,8 @@ public class CacheBreakdownProtection {
 
         // 缓存未命中，设置一个分布式锁键
         String mutexKey = ProductConstants.Cache.MUTEX_LOCK_PREFIX + cacheKey;
-        boolean lockAcquired = cacheManager.setIfAbsent(mutexKey, ProductConstants.Cache.MUTEX_LOCK_VALUE, ProductConstants.Cache.MUTEX_LOCK_EXPIRE_TIME);
+        boolean lockAcquired = cacheManager.setIfAbsent(mutexKey, ProductConstants.Cache.MUTEX_LOCK_VALUE,
+                ProductConstants.Cache.MUTEX_LOCK_EXPIRE_TIME);
 
         if (lockAcquired) {
             // 获取锁成功，查询数据库
