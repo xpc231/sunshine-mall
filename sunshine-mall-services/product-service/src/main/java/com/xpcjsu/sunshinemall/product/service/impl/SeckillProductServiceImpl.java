@@ -19,6 +19,7 @@ import com.xpcjsu.sunshinemall.product.helper.SeckillProductCacheHelper;
 import com.xpcjsu.sunshinemall.product.helper.SeckillProductStockHelper;
 import com.xpcjsu.sunshinemall.product.helper.SeckillProductConverter;
 import com.xpcjsu.sunshinemall.product.helper.SeckillProductValidator;
+import com.xpcjsu.sunshinemall.product.util.CacheExpireTimeManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -52,6 +53,7 @@ public class SeckillProductServiceImpl implements SeckillProductService {
     private final SeckillProductStockHelper stockHelper;
     private final SeckillProductConverter converter;
     private final SeckillProductValidator validator;
+    private final CacheExpireTimeManager expireTimeManager;
 
 
     @Override
@@ -298,7 +300,10 @@ public class SeckillProductServiceImpl implements SeckillProductService {
         dtoPage.setRecords(dtoList);
 
         // 3. 写入缓存（即使为空列表也缓存，防止缓存穿透）
-        cacheManager.set(cacheKey, dtoPage, ProductConstants.Cache.SECKILL_PRODUCT_PAGE_CACHE_EXPIRE);
+        // 使用随机过期时间，避免缓存雪崩
+        long randomExpireTime = expireTimeManager.getRandomExpireTime(
+                CacheExpireTimeManager.CacheType.SECKILL_PRODUCT_PAGE);
+        cacheManager.set(cacheKey, dtoPage, randomExpireTime);
         log.debug("秒杀商品分页列表写入缓存 - pageNum: {}, pageSize: {}, status: {}, total: {}, records: {}", 
                 pageNum, pageSize, status, dtoPage.getTotal(), dtoList.size());
 
@@ -425,18 +430,22 @@ public class SeckillProductServiceImpl implements SeckillProductService {
         Integer stock = seckillProduct.getSeckillStock();
 
         // 计算过期时间（秒杀结束时间 - 当前时间 + 1小时缓冲）
-        long expireTime = java.time.Duration.between(
+        long baseExpireTime = java.time.Duration.between(
                 LocalDateTime.now(),
                 seckillProduct.getEndTime()
         ).getSeconds() + 3600; // 秒杀结束后1小时过期
 
-        if (expireTime <= 0) {
-            expireTime = 3600; // 如果已过期，设置1小时过期时间
+        if (baseExpireTime <= 0) {
+            baseExpireTime = 3600; // 如果已过期，设置1小时过期时间
         }
 
+        // 使用随机过期时间，避免缓存雪崩
+        long randomExpireTime = expireTimeManager.getRandomExpireTime(baseExpireTime);
+
         try {
-            cacheManager.set(stockKey, stock, expireTime);
-            log.info("预热秒杀库存成功 - seckillId: {}, stock: {}, expireTime: {}s", id, stock, expireTime);
+            cacheManager.set(stockKey, stock, randomExpireTime);
+            log.info("预热秒杀库存成功 - seckillId: {}, stock: {}, baseExpireTime: {}s, randomExpireTime: {}s", 
+                    id, stock, baseExpireTime, randomExpireTime);
             return true;
         } catch (Exception e) {
             log.error("预热秒杀库存失败 - seckillId: {}", id, e);

@@ -27,6 +27,7 @@ public class CacheBreakdownProtection {
 
     private final CacheManager cacheManager;
     private final DistributedLock distributedLock;
+    private final CacheExpireTimeManager expireTimeManager;
 
     /**
      * 方案1：分布式锁 + 双重检查
@@ -64,12 +65,13 @@ public class CacheBreakdownProtection {
                 return cached2;
             }
 
-            // 缓存仍未命中，查询数据库
-            log.debug("缓存未命中，查询数据库 - cacheKey: {}", cacheKey);
-            T data = dataLoader.get();
+                // 缓存仍未命中，查询数据库
+                log.debug("缓存未命中，查询数据库 - cacheKey: {}", cacheKey);
+                T data = dataLoader.get();
 
-            // 写入缓存
-            writeToCache(cacheKey, data, expireTime);
+                // 写入缓存（使用随机过期时间，避免缓存雪崩）
+                long randomExpireTime = expireTimeManager.getRandomExpireTimeWithNeverExpire(expireTime);
+                writeToCache(cacheKey, data, randomExpireTime);
 
             return data;
         });
@@ -106,11 +108,12 @@ public class CacheBreakdownProtection {
         if (lockAcquired) {
             // 获取锁成功，查询数据库
             try {
-                log.debug("获取互斥锁成功，查询数据库 - cacheKey: {}", cacheKey);
-                T data = dataLoader.get();
+                    log.debug("获取互斥锁成功，查询数据库 - cacheKey: {}", cacheKey);
+                    T data = dataLoader.get();
 
-                // 写入缓存
-                writeToCache(cacheKey, data, expireTime);
+                    // 写入缓存（使用随机过期时间，避免缓存雪崩）
+                    long randomExpireTime = expireTimeManager.getRandomExpireTimeWithNeverExpire(expireTime);
+                    writeToCache(cacheKey, data, randomExpireTime);
 
                 return data;
             } finally {
@@ -231,10 +234,8 @@ public class CacheBreakdownProtection {
             cacheManager.set(cacheKey, data, expireTime);
             log.debug("数据写入缓存 - cacheKey: {}, expireTime: {}s", cacheKey, expireTime);
         } else {
-            // 防止缓存穿透：设置空值缓存（使用较短的过期时间）
-            long nullValueExpireTime = expireTime == -1L 
-                    ? ProductConstants.Cache.NULL_VALUE_CACHE_EXPIRE_TIME 
-                    : Math.min(expireTime / 6, ProductConstants.Cache.NULL_VALUE_CACHE_EXPIRE_TIME); // 最多5分钟
+            // 防止缓存穿透：设置空值缓存（使用随机过期时间，避免缓存雪崩）
+            long nullValueExpireTime = expireTimeManager.getNullValueRandomExpireTime(expireTime);
             cacheManager.setNullValue(cacheKey, nullValueExpireTime);
             log.debug("设置空值缓存 - cacheKey: {}, expireTime: {}s", cacheKey, nullValueExpireTime);
         }
