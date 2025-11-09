@@ -71,6 +71,20 @@
             <version>${project.version}</version>
         </dependency>
 
+        <!-- Cache模块 - 用于缓存键构建工具 -->
+        <dependency>
+            <groupId>com.xpcjsu</groupId>
+            <artifactId>sunshine-mall-framework-cache</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+
+        <!-- Guava - 本地令牌桶 RateLimiter 实现 -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>32.1.3-jre</version>
+        </dependency>
+
         <!-- Lombok -->
         <dependency>
             <groupId>org.projectlombok</groupId>

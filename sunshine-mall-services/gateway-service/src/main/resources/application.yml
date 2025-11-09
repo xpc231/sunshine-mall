@@ -19,3 +19,23 @@ spring:
   main:
     web-application-type: reactive
 
+# 令牌桶限流配置
+rate-limit:
+  token-bucket:
+    enabled: true  # 是否启用令牌桶限流
+    global:
+      capacity: 100      # 全局限流：令牌桶容量
+      refill-rate: 10    # 全局限流：每秒填充的令牌数
+    path-rules:
+      # 接口级限流配置（支持Ant风格路径匹配）
+      /api/seckill/**:
+        capacity: 50     # 秒杀接口：令牌桶容量
+        refill-rate: 5   # 秒杀接口：每秒填充的令牌数
+      /api/order/create:
+        capacity: 20     # 创建订单接口：令牌桶容量
+        refill-rate: 2   # 创建订单接口：每秒填充的令牌数
+    exclude-paths:       # 白名单路径（不进行限流）
+      - /actuator/**
+      - /api/user/login
+      - /api/user/register
+

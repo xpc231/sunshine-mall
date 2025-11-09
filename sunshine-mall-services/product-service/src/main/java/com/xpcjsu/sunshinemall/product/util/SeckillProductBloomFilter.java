@@ -200,13 +200,13 @@ public class SeckillProductBloomFilter implements CommandLineRunner {
         return bloomFilter.approximateElementCount();
     }
 
-    /**
+/*    *//**
      * 检查布隆过滤器是否已初始化
      *
      * @return true-已初始化, false-未初始化
-     */
+     *//*
     public boolean isInitialized() {
         return initialized;
-    }
+    }*/
 }
 
