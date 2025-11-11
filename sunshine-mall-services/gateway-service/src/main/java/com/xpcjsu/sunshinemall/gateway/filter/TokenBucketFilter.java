@@ -1,7 +1,6 @@
 package com.xpcjsu.sunshinemall.gateway.filter;
 
 import com.xpcjsu.sunshinemall.gateway.config.TokenBucketProperties;
-import com.xpcjsu.sunshinemall.gateway.exception.RateLimitException;
 import com.xpcjsu.sunshinemall.gateway.service.TokenBucketService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,12 +27,13 @@ import java.nio.charset.StandardCharsets;
  * @since 1.0.0
  */
 @Slf4j
-@Component
+@Component// 自动注册为Gateway的全局过滤器
 @RequiredArgsConstructor
 public class TokenBucketFilter implements GlobalFilter, Ordered {
 
     private final TokenBucketProperties tokenBucketProperties;
     private final TokenBucketService tokenBucketService;
+    // Spring框架提供的一个工具类，用于支持Ant风格的路径匹配模式
     private final AntPathMatcher antPathMatcher = new AntPathMatcher();
 
     /**
@@ -89,6 +89,9 @@ public class TokenBucketFilter implements GlobalFilter, Ordered {
                     return chain.filter(exchange);
                 });
     }
+
+
+    //私有方法 ----------------------------------------------------------------------------------------------------------
 
     /**
      * 检查路径是否在白名单中
@@ -156,6 +159,7 @@ public class TokenBucketFilter implements GlobalFilter, Ordered {
                 .map(entry -> {
                     log.debug("匹配到接口级限流规则 - path: {}, pattern: {}, rule: {}", 
                             path, entry.getKey(), entry.getValue());
+
                     return entry.getValue();
                 })
                 .findFirst()
@@ -163,25 +167,32 @@ public class TokenBucketFilter implements GlobalFilter, Ordered {
     }
 
     /**
-     * 处理限流响应
+     * 处理限流情况下的响应返回
+     * 当请求超过限流阈值时，返回429状态码和错误信息
+     *
+     * @param exchange 服务器Web交换对象，包含请求和响应信息
+     * @return Mono<Void> 异步响应完成信号
      */
     private Mono<Void> handleRateLimit(ServerWebExchange exchange) {
         ServerHttpResponse response = exchange.getResponse();
+        // 设置响应状态码为429 Too Many Requests
         response.setStatusCode(HttpStatus.TOO_MANY_REQUESTS);
+        // 设置响应内容类型为JSON格式
         response.getHeaders().add("Content-Type", "application/json;charset=UTF-8");
 
-        // 构造错误响应
+        // 构造限流错误响应JSON字符串
         String errorResponse = """
-                {
-                    "code": 429,
-                    "message": "请求过于频繁，请稍后重试",
-                    "timestamp": %d
-                }
-                """.formatted(System.currentTimeMillis());
+            {
+                "code": 429,
+                "message": "请求过于频繁，请稍后重试",
+                "timestamp": %d
+            }
+            """.formatted(System.currentTimeMillis());
 
-        byte[] bytes = errorResponse.getBytes(StandardCharsets.UTF_8);
-        org.springframework.core.io.buffer.DataBuffer buffer = response.bufferFactory().wrap(bytes);
-        return response.writeWith(Mono.just(buffer));
+        // 将错误响应写入响应体并返回
+        return response.writeWith(Mono.just(response.bufferFactory()
+                .wrap(errorResponse.getBytes(StandardCharsets.UTF_8))));
     }
+
 }
 

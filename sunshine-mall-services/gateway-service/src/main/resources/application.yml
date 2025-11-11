@@ -19,6 +19,7 @@ spring:
   main:
     web-application-type: reactive
 
+
 # 令牌桶限流配置
 rate-limit:
   token-bucket:
@@ -26,8 +27,8 @@ rate-limit:
     global:
       capacity: 100      # 全局限流：令牌桶容量
       refill-rate: 10    # 全局限流：每秒填充的令牌数
+    # 针对特定路径设置不同的限流规则
     path-rules:
-      # 接口级限流配置（支持Ant风格路径匹配）
       /api/seckill/**:
         capacity: 50     # 秒杀接口：令牌桶容量
         refill-rate: 5   # 秒杀接口：每秒填充的令牌数
