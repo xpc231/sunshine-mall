@@ -15,35 +15,11 @@
     <description>物流服务 - 物流管理、配送跟踪、签收确认</description>
 
     <dependencies>
-        <!-- 框架层依赖 -->
-        <dependency>
-            <groupId>com.xpcjsu</groupId>
-            <artifactId>sunshine-mall-framework-convention</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>com.xpcjsu</groupId>
-            <artifactId>sunshine-mall-framework-database</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>com.xpcjsu</groupId>
-            <artifactId>sunshine-mall-framework-cache</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>com.xpcjsu</groupId>
-            <artifactId>sunshine-mall-framework-distributedid</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        
+
         <!-- RocketMQ -->
         <dependency>
             <groupId>org.apache.rocketmq</groupId>
-            <artifactId>rocketmq-spring-boot-starter</artifactId>
+            <artifactId>rocketmq-client</artifactId>
         </dependency>
 
     </dependencies>

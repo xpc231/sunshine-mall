@@ -15,49 +15,6 @@
     <description>订单服务 - 订单管理、购物车、状态机</description>
 
     <dependencies>
-        <!-- 引入抽取后的通用 Feign 客户端 -->
-        <dependency>
-            <groupId>com.xpcjsu</groupId>
-            <artifactId>sunshine-mall-framework-common</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <!-- 框架层依赖 -->
-        <dependency>
-            <groupId>com.xpcjsu</groupId>
-            <artifactId>sunshine-mall-framework-convention</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.xpcjsu</groupId>
-            <artifactId>sunshine-mall-framework-database</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>com.xpcjsu</groupId>
-            <artifactId>sunshine-mall-framework-cache</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>com.xpcjsu</groupId>
-            <artifactId>sunshine-mall-framework-distributedid</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>com.xpcjsu</groupId>
-            <artifactId>sunshine-mall-framework-idempotent</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-
-        <!-- RocketMQ 分布式事务 -->
-        <dependency>
-            <groupId>org.apache.rocketmq</groupId>
-            <artifactId>rocketmq-spring-boot-starter</artifactId>
-        </dependency>
 
         <!-- Swagger/OpenAPI 文档与注解支持 -->
         <dependency>

@@ -42,6 +42,10 @@ public class ProductServiceImpl implements ProductService {
     private final CategoryMapper categoryMapper;
     private final CacheManager cacheManager;
     private final SnowflakeIdGenerator idGenerator;
+    private final com.xpcjsu.sunshinemall.product.service.SearchIndexService searchIndexService;
+    private final org.springframework.data.redis.core.StringRedisTemplate stringRedisTemplate;
+
+    private static final String HOT_ZSET = "product:z:hot";
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -83,6 +87,13 @@ public class ProductServiceImpl implements ProductService {
 
         //TODO 添加到布隆过滤器
 
+        // 构建搜索索引（最小实现）
+        try {
+            searchIndexService.buildIndex(product);
+        } catch (Exception e) {
+            log.warn("构建搜索索引失败 - productId: {}", productId, e);
+        }
+
         log.info("创建商品成功 - productId: {}, productCode: {}", productId, productCode);
         return productId;
     }
@@ -118,6 +129,12 @@ public class ProductServiceImpl implements ProductService {
 
         if (updated > 0) {
             log.info("更新商品成功 - productId: {}", productDTO.getId());
+            // 更新搜索索引（使用旧数据与新数据）
+            try {
+                searchIndexService.updateIndex(existingProduct, product);
+            } catch (Exception e) {
+                log.warn("更新搜索索引失败 - productId: {}", productDTO.getId(), e);
+            }
         }
 
         return updated > 0;
@@ -132,11 +149,22 @@ public class ProductServiceImpl implements ProductService {
 
         // TODO: 检查是否有关联订单（需要在订单模块完成后实现）
 
+        // 先查询旧商品数据用于索引清理
+        Product oldProduct = productMapper.selectById(productId);
+        if (oldProduct == null) {
+            throw new BusinessException("PRODUCT_NOT_FOUND", "商品不存在");
+        }
+
         // 删除商品（逻辑删除）
         int deleted = productMapper.deleteById(productId);
 
         if (deleted > 0) {
             log.info("删除商品成功 - productId: {}", productId);
+            try {
+                searchIndexService.removeIndex(oldProduct);
+            } catch (Exception e) {
+                log.warn("移除搜索索引失败 - productId: {}", productId, e);
+            }
         }
 
         return deleted > 0;
@@ -297,6 +325,13 @@ public class ProductServiceImpl implements ProductService {
             productMapper.update(null, new LambdaUpdateWrapper<Product>()
                     .setSql("view_count = view_count + 1")
                     .eq(Product::getId, productId));
+
+            // 更新热度排行榜（ZSet）
+            try {
+                stringRedisTemplate.opsForZSet().incrementScore(HOT_ZSET, String.valueOf(productId), 1.0);
+            } catch (Exception re) {
+                log.debug("更新热度失败 - productId: {}", productId, re);
+            }
         } catch (Exception e) {
             // 浏览次数更新失败不影响主流程
             log.error("增加浏览次数失败 - productId: {}", productId, e);

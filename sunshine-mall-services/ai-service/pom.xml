@@ -15,35 +15,11 @@
     <description>AI核心服务 - 智能客服、推荐引擎、语义搜索</description>
 
     <dependencies>
-        <!-- 框架层依赖 -->
-        <dependency>
-            <groupId>com.xpcjsu</groupId>
-            <artifactId>sunshine-mall-framework-convention</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        
-        <dependency>
-            <groupId>com.xpcjsu</groupId>
-            <artifactId>sunshine-mall-framework-cache</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        
-        <!-- Spring AI -->
-        <dependency>
-            <groupId>org.springframework.ai</groupId>
-            <artifactId>spring-ai-starter-model-ollama</artifactId>
-        </dependency>
-        
-        <!-- ElasticSearch -->
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-elasticsearch</artifactId>
-        </dependency>
-        
+
         <!-- RocketMQ -->
         <dependency>
             <groupId>org.apache.rocketmq</groupId>
-            <artifactId>rocketmq-spring-boot-starter</artifactId>
+            <artifactId>rocketmq-client</artifactId>
         </dependency>
 
     </dependencies>

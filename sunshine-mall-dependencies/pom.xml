@@ -29,7 +29,7 @@
         <caffeine.version>3.1.8</caffeine.version>
         
         <!-- 消息队列 -->
-        <rocketmq.version>2.2.3</rocketmq.version>
+        <!--<rocketmq.version>2.2.3</rocketmq.version>-->
         
         <!-- 搜索引擎 -->
         <elasticsearch.version>8.8.2</elasticsearch.version>
@@ -105,10 +105,16 @@
 
             <!-- ========================= 消息队列 ========================= -->
             <!-- RocketMQ 4.x (for RocketMQ Server 4.9.x) -->
-            <dependency>
+            <!--<dependency>
                 <groupId>org.apache.rocketmq</groupId>
                 <artifactId>rocketmq-spring-boot-starter</artifactId>
                 <version>${rocketmq.version}</version>
+            </dependency>-->
+
+            <dependency>
+                <groupId>org.apache.rocketmq</groupId>
+                <artifactId>rocketmq-client</artifactId>
+                <version>4.9.6</version>
             </dependency>
 
             <!-- ========================= 搜索引擎 ========================= -->
