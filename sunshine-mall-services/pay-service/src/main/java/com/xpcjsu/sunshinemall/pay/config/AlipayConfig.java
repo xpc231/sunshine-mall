@@ -7,6 +7,7 @@ import lombok.Data;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+// 支付宝支付配置
 @Configuration
 @Data
 public class AlipayConfig {
