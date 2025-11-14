@@ -16,8 +16,9 @@ import com.xpcjsu.sunshinemall.product.entity.StockLog;
 import com.xpcjsu.sunshinemall.framework.idempotent.annotation.Idempotent;
 import com.xpcjsu.sunshinemall.product.mapper.ProductStockMapper;
 import com.xpcjsu.sunshinemall.product.mapper.StockLogMapper;
+import com.xpcjsu.sunshinemall.framework.common.mq.MqClient;
 // RocketMQ已禁用，改用OpenFeign远程调用
-// import com.xpcjsu.sunshinemall.product.mq.message.StockChangeMessage;
+import com.xpcjsu.sunshinemall.product.mq.message.StockChangeMessage;
 // import com.xpcjsu.sunshinemall.product.mq.producer.StockChangeProducer;
 import com.xpcjsu.sunshinemall.product.service.StockService;
 import lombok.RequiredArgsConstructor;
@@ -40,6 +41,7 @@ public class StockServiceImpl implements StockService {
     private final StockLogMapper stockLogMapper;
     private final CacheManager cacheManager;
     private final SnowflakeIdGenerator idGenerator;
+    private final MqClient mqClient;
     // RocketMQ已禁用，改用OpenFeign远程调用
     // private final StockChangeProducer stockChangeProducer;
 
@@ -359,7 +361,7 @@ public class StockServiceImpl implements StockService {
                                  Integer beforeStock, Integer afterStock,
                                  Long orderId, String remark) {
         recordStockLog(skuId, operationType, quantity, beforeStock, afterStock, orderId, remark);
-        //sendStockChangeMessage(skuId, operationType, quantity, beforeStock, afterStock, orderId, remark);
+        sendStockChangeMessage(skuId, operationType, quantity, beforeStock, afterStock, orderId, remark);
     }
 
     /**
@@ -446,5 +448,21 @@ public class StockServiceImpl implements StockService {
         stockChangeProducer.sendStockChangeMessage(message);
     }
     */
+
+    private void sendStockChangeMessage(Long skuId, Integer operationType, Integer quantity,
+                                       Integer beforeStock, Integer afterStock,
+                                       Long orderId, String remark) {
+        StockChangeMessage message = new StockChangeMessage(
+                skuId, operationType, quantity, beforeStock, afterStock,
+                orderId, remark, System.currentTimeMillis()
+        );
+        mqClient.sendSync(
+                ProductConstants.MQ.STOCK_CHANGE_TOPIC,
+                null,
+                message,
+                String.valueOf(skuId),
+                null
+        );
+    }
 
 }

@@ -38,6 +38,12 @@
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
+        <!-- RocketMQ 客户端 -->
+        <dependency>
+            <groupId>org.apache.rocketmq</groupId>
+            <artifactId>rocketmq-client</artifactId>
+        </dependency>
+
         <!-- 在 common 模块中编译 Feign 注解接口（不引入 starter，避免自动装配） -->
         <dependency>
             <groupId>org.springframework.cloud</groupId>
