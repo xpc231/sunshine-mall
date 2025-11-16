@@ -1,20 +1,19 @@
 package com.xpcjsu.sunshinemall.user.service.impl;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.algorithms.Algorithm;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.xpcjsu.sunshinemall.framework.base.exception.BusinessException;
-import com.xpcjsu.sunshinemall.framework.base.exception.SystemException;
+
 import com.xpcjsu.sunshinemall.framework.cache.core.CacheManager;
 import com.xpcjsu.sunshinemall.framework.convention.errorcode.BusinessErrorCode;
-import com.xpcjsu.sunshinemall.user.config.JwtConfig;
+import com.xpcjsu.sunshinemall.user.config.JwtProperties;
 import com.xpcjsu.sunshinemall.user.dto.LoginRequest;
 import com.xpcjsu.sunshinemall.user.dto.LoginResponse;
 import com.xpcjsu.sunshinemall.user.dto.UserDTO;
 import com.xpcjsu.sunshinemall.user.entity.User;
 import com.xpcjsu.sunshinemall.user.mapper.UserMapper;
 import com.xpcjsu.sunshinemall.user.service.UserService;
+import com.xpcjsu.sunshinemall.user.utils.JwtTool;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -40,7 +39,8 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final CacheManager cacheManager;
     private final PasswordEncoder passwordEncoder;
-    private final JwtConfig jwtConfig;
+    private final JwtTool jwtTool;
+    private final JwtProperties jwtProperties;
 
     private static final String USER_CACHE_PREFIX = "user:";
     private static final String TOKEN_BLACKLIST_PREFIX = "token:blacklist:";
@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
         }
 
         // 生成 JWT Token
-        String token = generateToken(user.getId().toString(), user.getUsername());
+        String token = jwtTool.createToken(user.getId(), jwtProperties.getTokenTTL());
 
         // 缓存用户信息
         cacheManager.set(getUserCacheKey(user.getId()), user, USER_CACHE_EXPIRE);
@@ -76,7 +76,7 @@ public class UserServiceImpl implements UserService {
     @Override
     public void logout(String token) {
         // 将 token 加入黑名单（由网关验证）
-        cacheManager.set(getTokenBlacklistKey(token), "1", jwtConfig.getExpiration() / 1000);
+        cacheManager.set(getTokenBlacklistKey(token), "1", jwtProperties.getTokenTTL().toSeconds());
         log.info("Token已加入黑名单");
     }
 
@@ -242,29 +242,7 @@ public class UserServiceImpl implements UserService {
         return TOKEN_BLACKLIST_PREFIX + token;
     }
 
-    /**
-     * 生成 JWT Token
-     */
-    private String generateToken(String userId, String username) {
-        try {
-            java.util.Date now = new java.util.Date();
-            java.util.Date expiryDate = new java.util.Date(now.getTime() + jwtConfig.getExpiration());
-
-            java.util.Map<String, Object> claims = new java.util.HashMap<>();
-            claims.put("userId", userId);
-            claims.put("username", username);
-
-            return JWT.create()
-                    .withIssuer("sunshine-mall")
-                    .withIssuedAt(now)
-                    .withExpiresAt(expiryDate)
-                    .withClaim("claims", claims)
-                    .sign(Algorithm.HMAC256(jwtConfig.getSecret()));
-        } catch (Exception e) {
-            log.error("生成JWT Token失败 - userId: {}, username: {}", userId, username, e);
-            throw new SystemException("TOKEN_GENERATION_FAILED", "生成Token失败", e);
-        }
-    }
+    
 
     /**
      * 实体转 DTO

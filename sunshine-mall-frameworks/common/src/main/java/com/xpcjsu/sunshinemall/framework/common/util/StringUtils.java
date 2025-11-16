@@ -9,13 +9,6 @@ import java.util.regex.Pattern;
  * <p>
  * 专注于敏感信息脱敏功能，线程安全的静态工具方法。
  * 支持手机号、身份证、邮箱等常见敏感信息的脱敏处理。
- * <p>
- * 注意：其他字符串操作建议使用成熟的工具库：
- * <ul>
- * <li>基础字符串操作：Spring Framework 的 StringUtils</li>
- * <li>高级字符串操作：Hutool 的 StrUtil</li>
- * <li>模板处理：Spring 的 SpEL 表达式</li>
- * <li>命名转换：Jackson 的 PropertyNamingStrategies</li>
  * </ul>
  * 
  * @author sunshine-mall

@@ -8,7 +8,6 @@ import java.util.function.Supplier;
 /**
  * 单例工具类
  * <p>
- * 提供线程安全的单例实例管理，支持自定义初始化逻辑和默认构造器初始化。
  * 基于ConcurrentHashMap实现，保证高并发环境下的性能和安全性。
  */
 //final确保不会被继承
@@ -16,7 +15,6 @@ public final class SingletonHolder {
 
     /**
      * 单例实例存储容器
-     * 使用ConcurrentHashMap保证线程安全和高并发性能
      */
     private static final Map<Class<?>, Object> INSTANCES = new ConcurrentHashMap<>();
 
@@ -30,16 +28,7 @@ public final class SingletonHolder {
     /**
      * 获取单例实例（自定义初始化逻辑）
      *
-     * 如果实例不存在，则使用提供的Supplier创建实例:
-     * MyServiceImpl service = SingletonHolder.getInstance(
-     *     MyServiceImpl.class,
-     *     () -> new MyServiceImpl()  // Lambda 表达式作为 Supplier 实现
-     * );
-     * 优点:调用方可以自定义对象创建逻辑
-     *
-     * 该方法线程安全，保证同一类型只会创建一个实例。
      */
-    @SuppressWarnings("unchecked")
     public static <T> T getInstance(Class<T> clazz, Supplier<T> supplier) {
         //显式进行 null 判断
         if (clazz == null) {
@@ -61,14 +50,7 @@ public final class SingletonHolder {
     /**
      * 获取单例实例（使用默认无参构造器）
      *
-     * 当目标类有公共无参构造器时，调用方无需提供 Supplier，
-     * 直接传入 Class 对象即可获取单例实例
-     * 减少了样板代码，提升开发效率
-     *
-     * 使用反射调用目标类的无参构造器创建实例。
-     * 要求目标类必须有可访问的无参构造器。
      */
-    //Class - 类对象或类的运行时类型对象
     public static <T> T getInstance(Class<T> clazz) {
         //调用的方法内部进行了null判断
         return getInstance(clazz, () -> {
@@ -79,7 +61,8 @@ public final class SingletonHolder {
                 constructor.setAccessible(true);
                 return constructor.newInstance();
             } catch (Exception e) {
-                throw new RuntimeException("Failed to create singleton instance using default constructor for class: " + clazz.getName(), e);
+                throw new RuntimeException("Failed to create singleton instance using default constructor for class: "
+                        + clazz.getName(), e);
             }
         });
     }

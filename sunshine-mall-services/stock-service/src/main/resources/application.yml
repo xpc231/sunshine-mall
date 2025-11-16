@@ -1,0 +1,22 @@
+server:
+  port: 8090
+
+sunshine:
+  db:
+    database: sunshine_mall_storck
+
+spring:
+  application:
+    name: stock-service
+
+feign:
+  okhttp:
+    enabled: true
+  sentinel:
+    enabled: true
+  seata:
+    enabled: false
+
+distributed-id:
+  datacenter-id: 1
+  worker-id: 1

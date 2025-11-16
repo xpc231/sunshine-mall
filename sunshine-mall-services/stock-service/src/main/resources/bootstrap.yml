@@ -1,12 +1,14 @@
 spring:
 
-
   cloud:
     nacos:
       server-addr: 192.168.100.128
       config:
         file-extension: yaml
         shared-configs:
+          - dataId: shared-jdbc.yaml
           - dataId: shared-log.yaml
-          - dataId: shared-redis.yaml  # Redis 配置（用于Token黑名单等场景）
-          - dataId: shared-jwt.yaml
+          - dataId: shared-redis.yaml
+          - dataId: shared-rocketmq.yaml
+          - dataId: shared-sentinel.yaml
+

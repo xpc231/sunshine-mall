@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
  * 保持方法签名与原 order-service 一致，避免调用方变更。
  */
 @FeignClient(
-        name = "product-service",
+        name = "stock-service",
         contextId = "stockClient",
         fallbackFactory = StockClientFallbackFactory.class
 )

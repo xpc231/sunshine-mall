@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Configuration;
 @RequiredArgsConstructor
 public class MqAutoConfiguration {
 
-        /**
+    /**
      * JSON对象映射器，用于Java对象与JSON格式数据之间的序列化和反序列化操作
      * ObjectMapper是Jackson库的核心组件，提供了丰富的JSON处理功能
      */

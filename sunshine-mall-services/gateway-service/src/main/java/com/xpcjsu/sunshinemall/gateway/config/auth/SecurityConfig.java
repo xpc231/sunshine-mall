@@ -1,4 +1,4 @@
-package com.xpcjsu.sunshinemall.user.config;
+package com.xpcjsu.sunshinemall.gateway.config.auth;
 
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;

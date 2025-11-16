@@ -3,7 +3,7 @@ package com.xpcjsu.sunshinemall.gateway.filter;
 
 import cn.hutool.core.util.StrUtil;
 import com.xpcjsu.sunshinemall.framework.base.exception.UnauthorizedException;
-import com.xpcjsu.sunshinemall.gateway.config.AuthProperties;
+import com.xpcjsu.sunshinemall.gateway.config.auth.AuthProperties;
 import com.xpcjsu.sunshinemall.gateway.util.JwtTool;
 import lombok.RequiredArgsConstructor;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;

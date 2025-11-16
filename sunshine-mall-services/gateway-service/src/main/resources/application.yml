@@ -1,21 +1,16 @@
 server:
   port: 8086
 
-hm:
-  jwt:
-    location: classpath:hmall.jks
-    alias: hmall
-    password: hmall123
-    tokenTTL: 30m
-
-  auth:
-    exclude-paths:
-      - /api/user/login
-      - /api/user/register
-      - /actuator/health
-      - /actuator/info
+auth:
+  exclude-paths:
+    - /api/user/login
+    - /api/user/register
+    - /actuator/health
+    - /actuator/info
 
 spring:
+  application:
+    name: gateway-service
   main:
     web-application-type: reactive
 

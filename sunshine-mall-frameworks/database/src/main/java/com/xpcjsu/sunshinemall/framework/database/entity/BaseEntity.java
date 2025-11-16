@@ -31,7 +31,8 @@ import java.time.LocalDateTime;
 @Data
 public abstract class BaseEntity implements Serializable {
 
-    /*Java序列化机制使用的唯一标识符
+    /**
+     * Java序列化机制使用的唯一标识符
      验证序列化对象和反序列化对象的版本兼容性
      当类结构发生变化时，可通过此字段控制序列化兼容性
      值为1L表示这是该类的第一个版本*/

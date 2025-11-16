@@ -60,9 +60,6 @@ public final class CacheKeyBuilder {
      * 构建模式匹配键
      * <p>
      * 用于批量删除，例如：sunshine-mall:user:*
-     * 
-     * @param parts 键的组成部分
-     * @return 模式匹配键
      */
     public static String buildPattern(String... parts) {
         return build(parts) + CacheConstant.CACHE_KEY_SEPARATOR + "*";

@@ -11,18 +11,11 @@ import java.util.Optional;
 
 /**
  * Spring应用上下文管理器
- * 
- * 提供在静态方法中获取Spring容器中Bean的能力
- * 支持多种Bean获取方式：按类型、按名称、按注解等
- * 可以检查是否包含指定名称的Bean，或指定Bean名称和类型是否匹配
- * 线程安全，高性能，支持分布式微服务架构
  */
 @Component
 public final class ApplicationContextHolder implements ApplicationContextAware {
 
-    /**
-     * 存储Spring容器上下文对象，使用volatile保证多线程可见性
-     */
+
     private static volatile ApplicationContext applicationContext;
 
     /**

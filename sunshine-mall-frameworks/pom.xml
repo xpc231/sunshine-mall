@@ -23,7 +23,6 @@
         <module>cache</module>
         <module>distributedid</module>
         <module>idempotent</module>
-        <module>auth</module>
     </modules>
 
     <dependencyManagement>

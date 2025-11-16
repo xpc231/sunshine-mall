@@ -14,3 +14,7 @@ feign:
     enabled: true
   sentinel:
     enabled: true
+
+rocketmq:
+  producer:
+    group: user-service-producer-group

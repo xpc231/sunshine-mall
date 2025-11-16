@@ -10,11 +10,16 @@
         <version>0.0.1-SNAPSHOT</version>
     </parent>
     
-    <artifactId>user-service</artifactId>
-    <name>user-service</name>
-    <description>用户服务 - 用户管理、认证授权、会员体系</description>
+    <artifactId>stock-service</artifactId>
+    <name>stock-service</name>
+    <description>库存服务 - 提供库存检查、预占、释放、确认扣减、退货等接口</description>
 
     <dependencies>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-configuration-processor</artifactId>
+            <optional>true</optional>
+        </dependency>
     </dependencies>
 
     <build>
@@ -27,3 +32,4 @@
     </build>
 
 </project>
+
