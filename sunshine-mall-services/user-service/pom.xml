@@ -15,6 +15,13 @@
     <description>用户服务 - 用户管理、认证授权、会员体系</description>
 
     <dependencies>
+
+        <!-- JWT认证 -->
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+        </dependency>
+
     </dependencies>
 
     <build>

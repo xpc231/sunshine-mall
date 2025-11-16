@@ -9,6 +9,8 @@ spring:
   application:
     name: pay-service
 
+mq:
+  enabled: true
 
 distributed-id:
   datacenter-id: 1

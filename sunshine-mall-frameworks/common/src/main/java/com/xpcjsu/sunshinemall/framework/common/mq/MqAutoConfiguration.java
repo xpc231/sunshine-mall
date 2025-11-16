@@ -3,6 +3,7 @@ package com.xpcjsu.sunshinemall.framework.common.mq;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -10,6 +11,7 @@ import org.springframework.context.annotation.Configuration;
  * MQ自动配置类，用于创建和配置RocketMQ客户端实例
  */
 @Configuration
+@ConditionalOnProperty(prefix = "mq", name = "enabled", havingValue = "true", matchIfMissing = false)
 @RequiredArgsConstructor
 public class MqAutoConfiguration {
 
@@ -36,7 +38,7 @@ public class MqAutoConfiguration {
             @Value("${rocketmq.producer.group}") String producerGroup,
             @Value("${rocketmq.producer.send-message-timeout:3000}") int timeoutMs,
             @Value("${rocketmq.producer.retry-times-when-send-failed:2}") int retryTimes,
-            @Value("${mq.enabled:true}") boolean enabled
+            @Value("${mq.enabled:false}") boolean enabled
     ) {
         // 创建RocketMQ客户端实例并进行初始化
         RocketMqClient client = new RocketMqClient(objectMapper, nameServer, producerGroup, timeoutMs, retryTimes, enabled);

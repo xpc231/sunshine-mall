@@ -23,3 +23,7 @@ feign:
 distributed-id:
   datacenter-id: 1
   worker-id: 1
+
+rocketmq:
+  producer:
+    group: product-service-producer-group

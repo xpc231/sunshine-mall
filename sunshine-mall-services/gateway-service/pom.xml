@@ -22,12 +22,6 @@
             <artifactId>spring-cloud-starter-gateway</artifactId>
         </dependency>
 
-        <!-- Spring Cloud Loadbalancer - 负载均衡 -->
-        <dependency>
-            <groupId>org.springframework.cloud</groupId>
-            <artifactId>spring-cloud-starter-loadbalancer</artifactId>
-        </dependency>
-
         <!-- Spring Security - 安全框架 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -54,9 +48,11 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Redis - 用于Token黑名单等场景 -->
-
-        <!-- 移除 Guava 依赖（改回 Redis + Lua 分布式令牌桶） -->
+        <dependency>
+            <groupId>com.xpcjsu</groupId>
+            <artifactId>sunshine-mall-framework-cache</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
     </dependencies>
 

@@ -35,3 +35,5 @@ rate-limit:
       - /api/user/login
       - /api/user/register
 
+mq:
+  enabled: false
