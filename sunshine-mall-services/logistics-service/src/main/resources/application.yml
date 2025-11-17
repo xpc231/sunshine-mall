@@ -1,0 +1,14 @@
+server:
+  port: 8088
+
+sunshine:
+  db:
+    database: sunshine_mall_logistics
+
+spring:
+  application:
+    name: logistics-service
+
+distributed-id:
+  datacenter-id: 1
+  worker-id: 1
