@@ -1,6 +1,7 @@
 package com.xpcjsu.sunshinemall.gateway.service;
 
-import com.xpcjsu.sunshinemall.framework.cache.core.CacheKeyBuilder;
+
+import com.xpcjsu.sunshinemall.gateway.util.CacheKeyBuilder;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ClassPathResource;

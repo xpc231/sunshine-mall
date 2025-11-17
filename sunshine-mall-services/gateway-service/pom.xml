@@ -48,10 +48,15 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
+<!--        <dependency>
             <groupId>com.xpcjsu</groupId>
             <artifactId>sunshine-mall-framework-cache</artifactId>
             <version>${project.version}</version>
+        </dependency>-->
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
 
     </dependencies>
