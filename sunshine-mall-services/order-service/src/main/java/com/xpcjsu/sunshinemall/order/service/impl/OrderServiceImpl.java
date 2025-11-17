@@ -10,9 +10,6 @@ import com.xpcjsu.sunshinemall.framework.idempotent.annotation.Idempotent;
 import com.xpcjsu.sunshinemall.framework.common.feign.clients.ProductSkuClient;
 import com.xpcjsu.sunshinemall.framework.common.feign.clients.CartClient;
 import com.xpcjsu.sunshinemall.framework.common.feign.clients.StockClient;
-import com.xpcjsu.sunshinemall.framework.common.feign.clients.LogisticsClient;
-import com.xpcjsu.sunshinemall.framework.common.feign.dto.LogisticsCreateShipmentRequest;
-import com.xpcjsu.sunshinemall.framework.common.feign.dto.LogisticsShipmentDTO;
 import com.xpcjsu.sunshinemall.order.dto.constant.CacheConstants;
 import com.xpcjsu.sunshinemall.order.dto.constant.OrderConstants;
 import com.xpcjsu.sunshinemall.order.config.OrderMqProperties;
@@ -28,7 +25,7 @@ import com.xpcjsu.sunshinemall.order.dto.entity.OrderItem;
 import com.xpcjsu.sunshinemall.order.dto.enums.OrderStatus;
 import com.xpcjsu.sunshinemall.order.mapper.OrderInfoMapper;
 import com.xpcjsu.sunshinemall.order.mapper.OrderItemMapper;
-import com.xpcjsu.sunshinemall.framework.common.mq.message.OrderEventMessage;
+import com.xpcjsu.sunshinemall.order.mq.message.OrderEventMessage;
 import com.xpcjsu.sunshinemall.order.service.OrderService;
 // 移除未使用的状态机依赖，避免不必要的注入与代码膨胀
 import com.xpcjsu.sunshinemall.order.util.OrderIdGenerator;
@@ -57,7 +54,6 @@ public class OrderServiceImpl implements OrderService {
     private final ProductSkuClient productSkuClient;
     private final CartClient cartClient;
     private final StockClient stockClient;
-    private final LogisticsClient logisticsClient;
     private final OrderIdGenerator orderIdGenerator;
     // RocketMQ已禁用，改用OpenFeign远程调用
     // private final RocketMQTemplate rocketMQTemplate;
@@ -204,52 +200,6 @@ public class OrderServiceImpl implements OrderService {
         sendOrderEvent(MqConstant.Order.Tag.PAID, order.getId(), orderNo, userId);
 
         return true;
-    }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public boolean deliverOrder(Long userId, String orderNo, String carrierCode, String carrierName, String senderAddress, String trackingCode) {
-        OrderInfo order = loadOrderOrThrow(userId, orderNo);
-        if (!Objects.equals(order.getStatus(), OrderStatus.WAIT_SHIP.getCode())) {
-            throw new BusinessException(BusinessErrorCode.ORDER_STATUS_ERROR, "仅待发货订单可发货");
-        }
-
-        LogisticsCreateShipmentRequest req = new LogisticsCreateShipmentRequest();
-        req.setOrderNo(orderNo);
-        req.setCarrierCode(carrierCode);
-        req.setCarrierName(carrierName);
-        req.setReceiverName(order.getReceiverName());
-        req.setReceiverPhone(order.getReceiverPhone());
-        req.setReceiverAddress(order.getReceiverAddress());
-        req.setSenderAddress(senderAddress);
-        req.setTrackingCode(trackingCode);
-
-        var res = logisticsClient.createShipment(req);
-        if (res == null || res.isFailure() || res.getData() == null) {
-            throw new BusinessException(BusinessErrorCode.SYSTEM_BUSY, res == null ? "物流服务不可用" : res.getMessage());
-        }
-
-        LogisticsShipmentDTO shipment = res.getData();
-        order.setDeliveryCompany(carrierName);
-        order.setDeliverySn(shipment.getShipmentNo());
-        order.setDeliveryTime(LocalDateTime.now());
-        order.setStatus(OrderStatus.SHIPPED.getCode());
-        order.setUpdateTime(LocalDateTime.now());
-        orderInfoMapper.updateById(order);
-
-        sendOrderEvent(addShippedTagIfMissing(), order.getId(), orderNo, userId);
-        return true;
-    }
-
-    private String addShippedTagIfMissing() {
-        try {
-            java.lang.reflect.Field f = Class.forName("com.xpcjsu.sunshinemall.framework.common.mq.MqConstant$Order$Tag").getDeclaredField("SHIPPED");
-            Object v = f.get(null);
-            if (v instanceof String && ((String) v).length() > 0) {
-                return (String) v;
-            }
-        } catch (Throwable ignore) {}
-        return "shipped";
     }
 
 

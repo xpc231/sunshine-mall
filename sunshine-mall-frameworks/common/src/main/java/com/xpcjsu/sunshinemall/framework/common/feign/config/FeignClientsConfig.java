@@ -1,7 +1,6 @@
 package com.xpcjsu.sunshinemall.framework.common.feign.config;
 
 import com.xpcjsu.sunshinemall.framework.common.feign.fallback.OrderClientFallbackFactory;
-import com.xpcjsu.sunshinemall.framework.common.feign.fallback.LogisticsClientFallbackFactory;
 import com.xpcjsu.sunshinemall.framework.common.feign.fallback.ProductSkuClientFallbackFactory;
 import com.xpcjsu.sunshinemall.framework.common.feign.fallback.StockClientFallbackFactory;
 import com.xpcjsu.sunshinemall.framework.common.feign.fallback.CartClientFallbackFactory;
@@ -34,10 +33,5 @@ public class FeignClientsConfig {
     @Bean
     public CartClientFallbackFactory cartClientFallbackFactory() {
         return new CartClientFallbackFactory();
-    }
-
-    @Bean
-    public LogisticsClientFallbackFactory logisticsClientFallbackFactory() {
-        return new LogisticsClientFallbackFactory();
     }
 }

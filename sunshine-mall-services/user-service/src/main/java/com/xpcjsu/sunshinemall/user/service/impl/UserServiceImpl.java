@@ -64,13 +64,15 @@ public class UserServiceImpl implements UserService {
 
         // 生成 JWT Token
         String token = jwtTool.createToken(user.getId(), jwtProperties.getTokenTTL());
+        String refreshToken = jwtTool.createToken(user.getId(), java.time.Duration.ofDays(7));
+        cacheManager.set("refresh:" + refreshToken, String.valueOf(user.getId()), java.time.Duration.ofDays(7).toSeconds());
 
         // 缓存用户信息
         cacheManager.set(getUserCacheKey(user.getId()), user, USER_CACHE_EXPIRE);
 
         log.info("用户登录成功 - userId: {}, username: {}", user.getId(), user.getUsername());
 
-        return new LoginResponse(token, user.getId(), user.getUsername(), user.getRealName());
+        return new LoginResponse(token, refreshToken, user.getId(), user.getUsername(), user.getRealName());
     }
 
     @Override

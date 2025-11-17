@@ -20,6 +20,8 @@ public class LoginResponse {
      */
     private String token;
 
+    private String refreshToken;
+
     /**
      * 用户ID
      */

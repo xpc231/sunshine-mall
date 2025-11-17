@@ -69,16 +69,4 @@ public interface OrderService {
      * @return 订单项列表
      */
     List<OrderItem> listOrderItems(Long orderId);
-
-    /**
-     * 发货（创建运单并更新订单为已发货）
-     * @param userId 用户ID
-     * @param orderNo 订单编号
-     * @param carrierCode 物流公司编码
-     * @param carrierName 物流公司名称
-     * @param senderAddress 发件地址
-     * @param trackingCode 可选追踪码
-     * @return 是否成功
-     */
-    boolean deliverOrder(Long userId, String orderNo, String carrierCode, String carrierName, String senderAddress, String trackingCode);
 }
