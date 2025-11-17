@@ -8,6 +8,9 @@ import com.xpcjsu.sunshinemall.order.dto.order.OrderCreateRequest;
 import com.xpcjsu.sunshinemall.order.dto.order.OrderCreateResponse;
 import com.xpcjsu.sunshinemall.order.dto.order.OrderDetailResponse;
 import com.xpcjsu.sunshinemall.order.dto.order.OrderPaySuccessRequest;
+import com.xpcjsu.sunshinemall.order.dto.order.OrderDeliverRequest;
+import com.xpcjsu.sunshinemall.framework.common.feign.dto.LogisticsShipmentDTO;
+import com.xpcjsu.sunshinemall.framework.common.feign.clients.LogisticsClient;
 import com.xpcjsu.sunshinemall.order.service.OrderService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,6 +29,7 @@ import org.springframework.web.bind.annotation.*;
 public class OrderController {
 
     private final OrderService orderService;
+    private final LogisticsClient logisticsClient;
 
     @Operation(summary = "创建订单")
     @PostMapping("/create")
@@ -65,6 +69,30 @@ public class OrderController {
         Long userId = getUserIdFromRequest(httpRequest);
         orderService.cancelOrder(userId, request.getOrderNo());
         return Result.success();
+    }
+
+    @Operation(summary = "订单发货")
+    @PutMapping("/{orderNo}/deliver")
+    public Result<Void> deliver(@PathVariable String orderNo,
+                                @RequestBody @Valid OrderDeliverRequest request,
+                                HttpServletRequest httpRequest) {
+        Long userId = getUserIdFromRequest(httpRequest);
+        orderService.deliverOrder(userId, orderNo, request.getCarrierCode(), request.getCarrierName(), request.getSenderAddress(), request.getTrackingCode());
+        return Result.success();
+    }
+
+    @Operation(summary = "查询订单对应运单")
+    @GetMapping("/{orderNo}/shipment")
+    public Result<LogisticsShipmentDTO> getShipment(@PathVariable String orderNo,
+                                                    HttpServletRequest httpRequest) {
+        Long userId = getUserIdFromRequest(httpRequest);
+        orderService.getOrderByOrderNo(userId, orderNo);
+        var res = logisticsClient.getByOrderNo(orderNo);
+        if (res == null || res.isFailure()) {
+            return Result.failure(res == null ? BusinessErrorCode.SYSTEM_BUSY : res.getCode(),
+                    res == null ? "物流服务繁忙" : res.getMessage());
+        }
+        return Result.success(res.getData());
     }
 
     //TODO: 分页查询用户所有订单

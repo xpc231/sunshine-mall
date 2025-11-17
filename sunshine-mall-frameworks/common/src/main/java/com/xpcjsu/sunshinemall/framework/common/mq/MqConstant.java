@@ -21,6 +21,7 @@ public final class MqConstant {
             public static final String PAID = "paid";
             public static final String CANCELLED = "cancelled";
             public static final String TIMEOUT_CANCELLED = "timeout-cancelled";
+            public static final String SHIPPED = "shipped";
         }
     }
 }
