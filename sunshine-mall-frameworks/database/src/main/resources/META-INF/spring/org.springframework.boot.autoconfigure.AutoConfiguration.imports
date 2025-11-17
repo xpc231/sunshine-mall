@@ -1,0 +1,2 @@
+com.xpcjsu.sunshinemall.framework.database.config.MybatisPlusConfig
+com.xpcjsu.sunshinemall.framework.database.config.DatabaseAutoConfiguration

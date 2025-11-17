@@ -53,7 +53,7 @@ public final class CacheKeyBuilder {
         if (id == null) {
             throw new IllegalArgumentException("业务ID不能为null");
         }
-        return build(module, business, id.toString());
+        return build(new String[]{module, business, id.toString()});
     }
 
     /**

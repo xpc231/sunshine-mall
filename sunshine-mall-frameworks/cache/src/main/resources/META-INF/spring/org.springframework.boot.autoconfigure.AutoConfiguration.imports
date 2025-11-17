@@ -1,0 +1,2 @@
+com.xpcjsu.sunshinemall.framework.cache.config.RedisConfig
+com.xpcjsu.sunshinemall.framework.cache.config.CacheAutoConfiguration
