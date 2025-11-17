@@ -1,6 +1,8 @@
 package com.xpcjsu.sunshinemall.framework.common.util;
 
+// 用户上下文
 public class UserContext {
+
     private static final ThreadLocal<Long> tl = new ThreadLocal<>();
 
     /**

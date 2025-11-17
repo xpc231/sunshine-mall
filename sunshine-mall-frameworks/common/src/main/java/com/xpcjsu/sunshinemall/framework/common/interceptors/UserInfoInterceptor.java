@@ -21,7 +21,7 @@ public class UserInfoInterceptor implements HandlerInterceptor {
         String candidate = StrUtil.isNotBlank(userInfo) ? userInfo : xUserId;
         if (StrUtil.isNotBlank(candidate)) {
             try {
-                Long uid = Long.valueOf(candidate.trim());
+                Long uid = Long.valueOf(candidate.trim());//去除字符串两端空白字符
                 UserContext.setUser(uid);
                 log.debug("拦截器注入用户ID成功: {}", uid);
             } catch (NumberFormatException e) {
