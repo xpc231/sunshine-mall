@@ -19,3 +19,10 @@ feign:
 distributed-id:
   datacenter-id: 1
   worker-id: 1
+
+rocketmq:
+  producer:
+    group: stock-service-producer-group
+
+mq:
+  enabled: true

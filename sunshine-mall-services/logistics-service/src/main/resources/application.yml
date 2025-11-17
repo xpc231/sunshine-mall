@@ -12,3 +12,6 @@ spring:
 distributed-id:
   datacenter-id: 1
   worker-id: 1
+
+mq:
+  enabled: false

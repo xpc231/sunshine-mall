@@ -5,6 +5,8 @@ import com.xpcjsu.sunshinemall.framework.convention.result.Result;
 import com.xpcjsu.sunshinemall.framework.idempotent.annotation.Idempotent;
 import com.xpcjsu.sunshinemall.user.dto.LoginRequest;
 import com.xpcjsu.sunshinemall.user.dto.LoginResponse;
+import com.xpcjsu.sunshinemall.user.dto.LoginRefreshResponse;
+import com.xpcjsu.sunshinemall.user.dto.RefreshTokenRequest;
 import com.xpcjsu.sunshinemall.user.dto.UserDTO;
 import com.xpcjsu.sunshinemall.user.service.UserService;
 import jakarta.validation.Valid;
@@ -47,6 +49,13 @@ public class UserController {
         
         userService.logout(token);
         return Result.success(null, "登出成功");
+    }
+
+    // 刷新令牌
+    @PostMapping("/refresh")
+    public Result<LoginRefreshResponse> refresh(@Valid @RequestBody RefreshTokenRequest request) {
+        LoginRefreshResponse resp = userService.refreshToken(request);
+        return Result.success(resp, "刷新成功");
     }
 
     /**

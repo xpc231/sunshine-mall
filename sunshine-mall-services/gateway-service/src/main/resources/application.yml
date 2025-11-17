@@ -5,6 +5,7 @@ auth:
   exclude-paths:
     - /api/user/login
     - /api/user/register
+    - /api/user/refresh
     - /actuator/health
     - /actuator/info
 
@@ -34,6 +35,7 @@ rate-limit:
       - /actuator/**
       - /api/user/login
       - /api/user/register
+      - /api/user/refresh
 
 mq:
   enabled: false

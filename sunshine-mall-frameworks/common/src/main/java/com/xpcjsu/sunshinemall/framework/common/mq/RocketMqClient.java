@@ -112,39 +112,6 @@ public class RocketMqClient implements MqClient, DisposableBean {
         }
     }
 
-    /**
-     * 异步发送消息，通过回调函数处理发送结果
-     */
-    @Override
-    public void sendAsync(String topic, String tag, Object payload, String key, Map<String, String> headers,
-                          SendCallback callback) {
-        if (!enabled) {
-            return;
-        }
-        Message message = toMessage(topic, tag, payload, key, headers);
-        try {
-            producer.send(message, callback);
-        } catch (Exception e) {
-            log.error("MQ sendAsync failed: topic={}, tag={}, key={}", topic, tag, key, e);
-        }
-    }
-
-    /**
-     * 单向发送消息，不等待发送结果响应
-     * 适用于对可靠性要求不高的场景
-     */
-    @Override
-    public void sendOneWay(String topic, String tag, Object payload, String key, Map<String, String> headers) {
-        if (!enabled) {
-            return;
-        }
-        Message message = toMessage(topic, tag, payload, key, headers);
-        try {
-            producer.sendOneway(message);
-        } catch (Exception e) {
-            log.error("MQ sendOneWay failed: topic={}, tag={}, key={}", topic, tag, key, e);
-        }
-    }
 
     /**
      * 同步发送延时消息，消息将在指定延时等级后被消费

@@ -27,3 +27,6 @@ distributed-id:
 rocketmq:
   producer:
     group: product-service-producer-group
+
+mq:
+  enabled: true

@@ -9,6 +9,8 @@ import com.xpcjsu.sunshinemall.framework.convention.errorcode.BusinessErrorCode;
 import com.xpcjsu.sunshinemall.user.config.JwtProperties;
 import com.xpcjsu.sunshinemall.user.dto.LoginRequest;
 import com.xpcjsu.sunshinemall.user.dto.LoginResponse;
+import com.xpcjsu.sunshinemall.user.dto.LoginRefreshResponse;
+import com.xpcjsu.sunshinemall.user.dto.RefreshTokenRequest;
 import com.xpcjsu.sunshinemall.user.dto.UserDTO;
 import com.xpcjsu.sunshinemall.user.entity.User;
 import com.xpcjsu.sunshinemall.user.mapper.UserMapper;
@@ -44,8 +46,10 @@ public class UserServiceImpl implements UserService {
 
     private static final String USER_CACHE_PREFIX = "user:";
     private static final String TOKEN_BLACKLIST_PREFIX = "token:blacklist:";
+    private static final String REFRESH_USER_PREFIX = "refresh:user:";
     private static final long USER_CACHE_EXPIRE = 3600L; // 1小时
 
+    // 登录
     @Override
     public LoginResponse login(LoginRequest loginRequest) {
         // 查询用户（优化：链式调用）
@@ -62,24 +66,36 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(BusinessErrorCode.USER_ACCESS_DENIED, "账号已被禁用");
         }
 
-        // 生成 JWT Token
-        String token = jwtTool.createToken(user.getId(), jwtProperties.getTokenTTL());
+        String accessToken = jwtTool.createAccessToken(user.getId(), jwtProperties.getTokenTTL());
+        String refreshToken = jwtTool.createRefreshToken(user.getId(), jwtProperties.getRefreshTTL());
 
         // 缓存用户信息
         cacheManager.set(getUserCacheKey(user.getId()), user, USER_CACHE_EXPIRE);
+        cacheManager.set(getRefreshUserKey(user.getId()), refreshToken, jwtProperties.getRefreshTTL().toSeconds());
 
         log.info("用户登录成功 - userId: {}, username: {}", user.getId(), user.getUsername());
 
-        return new LoginResponse(token, user.getId(), user.getUsername(), user.getRealName());
+        LoginResponse resp = new LoginResponse();
+        resp.setToken(accessToken);
+        resp.setUserId(user.getId());
+        resp.setUsername(user.getUsername());
+        resp.setRealName(user.getRealName());
+        resp.setRefreshToken(refreshToken);
+        return resp;
     }
 
+    // 登出
     @Override
     public void logout(String token) {
-        // 将 token 加入黑名单（由网关验证）
         cacheManager.set(getTokenBlacklistKey(token), "1", jwtProperties.getTokenTTL().toSeconds());
-        log.info("Token已加入黑名单");
+        try {
+            Long userId = jwtTool.parseAccessToken(token);
+            cacheManager.delete(getRefreshUserKey(userId));
+        } catch (Exception ignored) {}
+        log.info("登出：加入访问令牌黑名单并清除刷新令牌");
     }
 
+    // 创建用户
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createUser(UserDTO userDTO) {
@@ -115,6 +131,7 @@ public class UserServiceImpl implements UserService {
         return user.getId();
     }
 
+    // 根据ID查询用户
     @Override
     public UserDTO getUserById(Long id) {
         // 先从缓存获取
@@ -137,6 +154,7 @@ public class UserServiceImpl implements UserService {
         return convertToDTO(user);
     }
 
+    // 根据用户名查询用户
     @Override
     public UserDTO getUserByUsername(String username) {
         User user = userMapper.selectOne(
@@ -150,6 +168,7 @@ public class UserServiceImpl implements UserService {
         return convertToDTO(user);
     }
 
+    // 获取所有用户
     @Override
     public List<UserDTO> getAllUsers() {
         // 限制最多返回 1000 条，防止内存溢出
@@ -160,6 +179,7 @@ public class UserServiceImpl implements UserService {
                 .collect(Collectors.toList());
     }
 
+    // 分页查询用户
     @Override
     public Page<UserDTO> getUsersByPage(int pageNum, int pageSize) {
 
@@ -176,6 +196,7 @@ public class UserServiceImpl implements UserService {
         return dtoPage;
     }
 
+    // 更新用户
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean updateUser(UserDTO userDTO) {
@@ -209,6 +230,7 @@ public class UserServiceImpl implements UserService {
         return true;
     }
 
+    // 删除用户
     @Override
     @Transactional(rollbackFor = Exception.class)
     public boolean deleteUser(Long id) {
@@ -228,6 +250,27 @@ public class UserServiceImpl implements UserService {
         return true;
     }
 
+
+    // 刷新令牌
+    @Override
+    public LoginRefreshResponse refreshToken(RefreshTokenRequest request) {
+        Long userId = jwtTool.parseRefreshToken(request.getRefreshToken());
+        Object rtInRedis = cacheManager.get(getRefreshUserKey(userId));
+        if (rtInRedis == null) {
+            throw new BusinessException(BusinessErrorCode.USER_NOT_LOGIN, "未登录或刷新令牌已失效");
+        }
+        if (!request.getRefreshToken().equals(rtInRedis.toString())) {
+            throw new BusinessException(BusinessErrorCode.USER_NOT_LOGIN, "刷新令牌不匹配");
+        }
+        String newAccess = jwtTool.createAccessToken(userId, jwtProperties.getTokenTTL());
+        return new LoginRefreshResponse(newAccess);
+    }
+
+
+
+    //---- 私有方法 --------------------------------------------------------------------------------------------------------
+
+
     /**
      * 生成用户缓存键
      */
@@ -242,7 +285,13 @@ public class UserServiceImpl implements UserService {
         return TOKEN_BLACKLIST_PREFIX + token;
     }
 
-    
+    /**
+     * 获取用户刷新令牌缓存键
+     */
+    private String getRefreshUserKey(Long userId) {
+        return REFRESH_USER_PREFIX + userId;
+    }
+
 
     /**
      * 实体转 DTO
@@ -254,4 +303,6 @@ public class UserServiceImpl implements UserService {
         dto.setPassword(null);
         return dto;
     }
+
+
 }

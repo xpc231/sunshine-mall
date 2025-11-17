@@ -19,3 +19,5 @@ rocketmq:
   producer:
     group: cart-service-producer-group
 
+mq:
+  enabled: true

@@ -27,7 +27,7 @@ public class JwtTool {
      * @return access-token
      */
     public String createToken(Long userId, Duration ttl) {
-        // 1.生成jws
+
         return JWT.create()
                 .setPayload("user", userId)
                 .setExpiresAt(new Date(System.currentTimeMillis() + ttl.toMillis()))
@@ -63,6 +63,11 @@ public class JwtTool {
             JWTValidator.of(jwt).validateDate();
         } catch (ValidateException e) {
             throw new UnauthorizedException("token已经过期");
+        }
+        // 3.1 校验类型（兼容旧令牌无type的情况）
+        Object type = jwt.getPayload("type");
+        if (type != null && !"access".equals(type.toString())) {
+            throw new UnauthorizedException("无效的token");
         }
         // 4.数据格式校验
         Object userPayload = jwt.getPayload("user");

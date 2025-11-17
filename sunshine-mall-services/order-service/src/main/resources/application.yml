@@ -24,3 +24,6 @@ rocketmq:
 order:
   mq:
     delay-cancel-level: 3
+
+mq:
+  enabled: true

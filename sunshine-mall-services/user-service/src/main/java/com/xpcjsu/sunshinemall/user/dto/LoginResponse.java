@@ -34,4 +34,7 @@ public class LoginResponse {
      * 真实姓名
      */
     private String realName;
+
+    // 刷新令牌
+    private String refreshToken;
 }
