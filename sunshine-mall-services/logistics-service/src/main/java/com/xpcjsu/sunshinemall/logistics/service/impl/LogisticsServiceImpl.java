@@ -17,6 +17,7 @@ import com.xpcjsu.sunshinemall.logistics.mapper.LogisticsEventMapper;
 import com.xpcjsu.sunshinemall.logistics.mapper.LogisticsShipmentMapper;
 import com.xpcjsu.sunshinemall.logistics.util.LogisticsIdGenerator;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
